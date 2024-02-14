@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { TextInput, Pressable, View, Text, StyleSheet } from 'react-native';
 import { useRouter, Link } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../config/firebaseConfig'
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -10,11 +8,6 @@ const LoginPage = () => {
 
   const handleLogin = () => {
     // handling login logic here
-    if(email != "" && password != ""){
-      signInWithEmailAndPassword(auth, email, password)
-      .then(() => console.log("Login success"))
-      .catch((err) => Alert.alert("Login error", err.message));
-    }
     router.replace('/posts');
   };
 
