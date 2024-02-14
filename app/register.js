@@ -1,34 +1,50 @@
 import React, { useState } from "react";
 import { Text, View, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { auth, database } from '../config/firebaseConfig';
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth } from '../config/firebaseConfig';
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPhoneNumber, confirm } from "firebase/auth";
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [imageURL, setImageURL] = useState("");
+  const [imageURL, setImageURL] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState(null);
 
   const handleRegister = async () => {
     try {
+      // Basic form validation
+      if (!email || !password) {
+        Alert.alert("Please enter both email and password");
+        return;
+      }
+
+      // Password and confirm password matching validation
+      if (password !== confirmPassword) {
+        Alert.alert("Password and confirm password do not match");
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      const userRef = doc(database, "users", user.uid);
-      await setDoc(userRef, {
-        displayName: name,
-        email: email,
-        uid: user.uid,
-        photoURL: imageURL || profile,
-        phoneNumber: "",
-      });
+
+      // Send email verification
+      await sendEmailVerification(user);
+
+      Alert.alert('A verification email has been sent. Please check your inbox.');
+
+      // Optionally, you can add firestore code here if needed
+      // ...
+
+      router.replace('/posts');
     } catch (error) {
       Alert.alert(error.message);
     }
-    router.replace('/posts');
   };
+
   
 
   const router = useRouter();
@@ -79,6 +95,12 @@ const RegisterPage = () => {
         value={imageURL}
         onChangeText={(text) => setImageURL(text)}
       />
+      <TextInput
+        placeholder="Phone Number"
+        value={phoneNumber}
+        onChangeText={(text) => setPhoneNumber(text)}
+        style={styles.input}
+      />
 
       <Pressable
         onPress={handleRegister}
@@ -93,6 +115,8 @@ const RegisterPage = () => {
         }}>
         <Text style={{ color: 'white' }}>Register</Text>
       </Pressable>
+
+      
     </View>
   );
 };

@@ -28,6 +28,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
+#Firebase SDK
+# Ignore app.config.js if used for sensitive configurations
+config/firebaseConfig.js
+
 # local env files
 .env*.local
 
