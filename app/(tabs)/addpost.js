@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
+import * as ImagePicker from 'expo-image-picker';
 
 
 
@@ -18,29 +19,33 @@ const AddPost = () => {
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === 'ios');
+    setShowDatePicker(Platform.OS === 'andriod');
     setDate(currentDate);
   };
 
   
   const pickImage = async () => {
-    const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
-
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
   
     if (status !== 'granted') {
       alert('Sorry, we need permission to access your photos.');
       return;
     }
   
-    const result = await launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    try {
+      const result = await launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
   
-    if (!result.cancelled) {
-      setImage(result.uri);
+      if (!result.cancelled) {
+        setImage(result.uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      alert('Failed to pick image. Please try again.');
     }
   };
   const handlePost = () => {

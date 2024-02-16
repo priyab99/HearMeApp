@@ -14,7 +14,7 @@ const AuthenticatedUserProvider=({children})=>{
 };
 
 const App = () => {
-    // Use the AuthenticatedUserContext
+    // Using the AuthenticatedUserContext
   const { user, setUser } = useContext(AuthenticatedUserContext);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,7 +26,7 @@ const App = () => {
         setIsLoading(false);
       }
     );
-    return unsubscribeAuth; // Unsubscribe auth listener on unmount
+    return unsubscribeAuth; // Unsubscribing auth listener on unmount
   }, [user]);
 
   // Conditional rendering based on authentication state
@@ -41,8 +41,9 @@ const App = () => {
   }
   const routes = useRoutes(() => [
     // Authenticated routes
-    { path: '/posts', component: posts, isPublic: user }, // Make home screen public only for authenticated users
+    { path: '/posts', component: posts, isPublic: user }, // Making home screen public only for authenticated users
     { path: '/profile', component: profile, isPublic: user },
+    { path: '/addpost', component: addpost, isPublic: user },
     // ...other authenticated routes
 
     // Non-authenticated routes

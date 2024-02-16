@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from '../config/firebaseConfig';
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPhoneNumber, confirm } from "firebase/auth";
+import { auth, database } from '../config/firebaseConfig';
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { doc, setDoc, getDocs ,collection} from "firebase/firestore";
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -11,14 +12,38 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [imageURL, setImageURL] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [username, setUsername] = useState('');
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
+
+  useEffect(() => {
+    const checkUsernameAvailability = async () => {
+      if (username.trim() !== "") {
+        try {
+          console.log("Checking username availability for:", username);
+          const querySnapshot = await getDocs(collection(database, 'users'));
+          //console.log("Query Snapshot:", querySnapshot.docs.map(doc => doc.data()));
+          querySnapshot.forEach((doc) => {
+            if (doc.data().username === username) {
+              console.log("Username is taken");
+              setIsUsernameAvailable(false);
+            }
+          });
+          //console.log("Is Username Available:", isUsernameAvailable);
+        } catch (error) {
+          console.error("Error checking username availability:", error.message);
+        }
+      }
+    };
+
+    // Checking username availability on each change to the 'username' state
+    checkUsernameAvailability();
+  }, [username]);
 
   const handleRegister = async () => {
     try {
       // Basic form validation
-      if (!email || !password) {
-        Alert.alert("Please enter both email and password");
+      if (!email || !password || !name || !username) {
+        Alert.alert("Please fill in all fields");
         return;
       }
 
@@ -28,24 +53,34 @@ const RegisterPage = () => {
         return;
       }
 
+      // Checking if the username is available
+      if (!isUsernameAvailable) {
+        Alert.alert("Username is already taken. Please choose another.");
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Send email verification
+      // Sending email verification
       await sendEmailVerification(user);
 
       Alert.alert('A verification email has been sent. Please check your inbox.');
 
-      // Optionally, you can add firestore code here if needed
-      // ...
+      // Adding Firestore code to store user information
+      await setDoc(doc(database, 'users', user.uid), {
+        name,
+        email,
+        imageURL,
+        phoneNumber,
+        username,
+      });
 
       router.replace('/posts');
     } catch (error) {
       Alert.alert(error.message);
     }
   };
-
-  
 
   const router = useRouter();
 
@@ -76,6 +111,12 @@ const RegisterPage = () => {
         style={styles.input}
       />
       <TextInput
+        placeholder="Username"
+        value={username}
+        onChangeText={(text) => setUsername(text)}
+        style={styles.input}
+      />
+        <TextInput
         placeholder="Password"
         value={password}
         onChangeText={(text) => setPassword(text)}
@@ -101,7 +142,13 @@ const RegisterPage = () => {
         onChangeText={(text) => setPhoneNumber(text)}
         style={styles.input}
       />
-
+      {/* Adding a message indicating if the username is available or not */}
+      {username.trim() !== "" && (
+        <Text style={{ color: isUsernameAvailable ? 'green' : 'red' }}>
+          {isUsernameAvailable ? 'Username is available' : 'Username is taken'}
+        </Text>
+      )}
+      {/* ... other input fields */}
       <Pressable
         onPress={handleRegister}
         style={{
@@ -115,8 +162,6 @@ const RegisterPage = () => {
         }}>
         <Text style={{ color: 'white' }}>Register</Text>
       </Pressable>
-
-      
     </View>
   );
 };
