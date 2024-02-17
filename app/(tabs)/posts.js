@@ -1,45 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { collection, getDocs } from 'firebase/firestore';
+import { database } from '../../config/firebaseConfig';
 
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Pressable } from 'react-native';
 
 
 const HomeScreen = () => {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      UserName: "Kriti",
-      title: 'Feeling Sad',
-      description: 'I am feeling very low today. My thougts are not okay. I dont know what to do',
-      imageUrl: 'https://media.glamourmagazine.co.uk/photos/6274ec0e46a1a79c69ae3ccf/16:9/w_2560%2Cc_limit/HIGH%2520FUNCTIONING%2520DEPRESSION%2520090221%2520%2520%2520GettyImages-1301653190_SF.jpg',
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      rating: 0,
-    },
-    {
-      id: 2,
-      UserName: "Ria",
-      title: 'Financial Struggle',
-      description: 'I dont have enough money right now. I dont know how will i get money.',
-      imageUrl: 'https://media.glamourmagazine.co.uk/photos/6274ec0e46a1a79c69ae3ccf/16:9/w_2560%2Cc_limit/HIGH%2520FUNCTIONING%2520DEPRESSION%2520090221%2520%2520%2520GettyImages-1301653190_SF.jpg',
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      rating: 0,
-    },
-    {
-      id: 3,
-      UserName: "Mamun",
-      title: 'Academic Pressure',
-      description: 'I am dealing with too much pressure. I dont know how to keep up with the current education process of our university.',
-      imageUrl: 'https://media.glamourmagazine.co.uk/photos/6274ec0e46a1a79c69ae3ccf/16:9/w_2560%2Cc_limit/HIGH%2520FUNCTIONING%2520DEPRESSION%2520090221%2520%2520%2520GettyImages-1301653190_SF.jpg',
-      likes: 0,
-      dislikes: 0,
-      comments: [],
-      rating: 0,
-    },
-  
-  ]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const postsCollection = collection(database, 'posts');
+        const querySnapshot = await getDocs(postsCollection);
+
+        const fetchedPosts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error('Error fetching posts:', error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (loading) {
+    return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
+  }
 
   const handleLike = (postId) => {
     setPosts((prevPosts) =>
@@ -79,13 +73,15 @@ const HomeScreen = () => {
       {posts.map((post) => (
       
         <TouchableOpacity key={post.id} style={styles.card}>
-            <Text style={styles.UserName}>{post.UserName}</Text>
+            <Text style={styles.userName}>{post.userName}</Text>
+            <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
+
             
             <Text style={styles.title}>{post.title}</Text>
           
          
           <Text style={styles.description}>{post.description}</Text>
-          {post.imageUrl && <Image source={{ uri: post.imageUrl }} style={styles.image} />}
+          {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
 
           {/* Like, Dislike, Comment, and Rating UI */}
           <View style={styles.actions}>

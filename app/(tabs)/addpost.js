@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Platform, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet,ScrollView, Platform, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -128,7 +128,7 @@ const AddPost = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Add Your Post</Text>
       <TextInput
         style={styles.input}
@@ -184,7 +184,7 @@ const AddPost = () => {
 
 
       <Button title="Post" onPress={handlePost} />
-    </View>
+    </ScrollView>
   );
 };
 
