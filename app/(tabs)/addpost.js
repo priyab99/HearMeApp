@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Platform, Image, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, TextInput, Button, StyleSheet, Platform, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { launchImageLibraryAsync } from 'expo-image-picker';
-import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker';
+import { firebase, database, auth } from "../../config/firebaseConfig"
+import { setDoc,doc, getDoc } from "firebase/firestore";
 
 
 
@@ -15,7 +15,8 @@ const AddPost = () => {
   const [category, setCategory] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-   const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -23,39 +24,107 @@ const AddPost = () => {
     setDate(currentDate);
   };
 
-  
+
   const pickImage = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-  
-    if (status !== 'granted') {
-      alert('Sorry, we need permission to access your photos.');
-      return;
-    }
-  
-    try {
-      const result = await launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-  
-      if (!result.cancelled) {
-        setImage(result.uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      alert('Failed to pick image. Please try again.');
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1, // 0 means compress for small size, 1 means compress for maximum quality
+
+    });
+    console.log(result);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
     }
   };
-  const handlePost = () => {
-    // Add logic to handle the post (e.g., sending it to a server)
-    console.log('Title:', title);
-    console.log('Description:', description);
-    console.log('Category:', category);
-    console.log('Date:', date);
-    console.log('Image:', image);
-    // Add further logic as needed
+  const uploadImage = async () => {
+    try {
+      if (!image) {
+        console.warn('No image selected for upload.');
+        return null;
+      }
+  
+      const response = await fetch(image);
+      const blob = await response.blob();
+  
+      const ref = firebase.storage().ref().child(`Pictures/Image_${Date.now()}`);
+      const snapshot = await ref.put(blob);
+  
+      // Get download URL after image is successfully uploaded
+      const downloadURL = await snapshot.ref.getDownloadURL();
+      
+      console.log('Image uploaded successfully:', downloadURL);
+  
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+  
+
+  const handlePost = async () => {
+    try {
+      setUploading(true);
+  
+      // Uploading the image and get the download URL
+      const imageUrl = await uploadImage();
+  
+      // Fix: Add a document ID for the post
+      const docRef = doc(database, 'posts', `post_${Date.now()}`); // Use a timestamp for unique ID
+  
+      if (imageUrl) {
+        const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
+        if (userDoc.exists()) {
+          await setDoc(docRef, {
+            title,
+            description,
+            category,
+            date,
+            image: imageUrl,
+          
+            userName: userDoc.data().username, // Include user's username in the post
+          });
+        } else {
+          console.warn('User document not found');
+          await setDoc(docRef, {
+            title,
+            description,
+            category,
+            date,
+            image: imageUrl,
+            
+            userName: 'Unknown', // Default value if user document not found
+          });
+        }
+      } else {
+        console.warn('Image URL is undefined. Skipping image field in Firestore.');
+        await setDoc(docRef, {
+          title,
+          description,
+          category,
+          date,
+          
+          userName: 'Unknown', // Default value if image is not uploaded
+        });
+      }
+
+       
+  
+    
+
+      // Reset form fields
+      setTitle('');
+      setDescription('');
+      setCategory('');
+      setDate(new Date());
+      setImage(null);
+    } catch (error) {
+      console.error('Error adding post:', error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -108,15 +177,12 @@ const AddPost = () => {
           onChange={handleDateChange}
         />
       )}
-       {image && (
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: image }} style={styles.image} />
-          <Button title="Remove Image" onPress={() => setImage(null)} />
-        </View>
-      )}
-      <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
-        <Text style={styles.imagePickerButtonText}>Choose Image</Text>
-      </TouchableOpacity>
+
+      {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
+      <Button title='Select Image' onPress={pickImage} />
+      {!uploading ? <Button title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
+
+
       <Button title="Post" onPress={handlePost} />
     </View>
   );
