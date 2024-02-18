@@ -13,12 +13,12 @@ import 'firebase/compat/storage'
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_API_KEY,
-  authDomain:process.env.EXPO_PUBLIC_AUTH_DOMAIN,
-  projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
-  storageBucket:process.env.EXPO_PUBLIC_STORAGE_BUCKET ,
-  messagingSenderId:process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID ,
-  appId: process.env.EXPO_PUBLIC_APP_ID
+  apiKey: "AIzaSyAmUCsqYW0SeE9eK6Ix3EIfxN2U4Ljcw2k",
+  authDomain:"hear-me-fc3db.firebaseapp.com",
+  projectId: "hear-me-fc3db",
+  storageBucket: "hear-me-fc3db.appspot.com",
+  messagingSenderId: "116758683301",
+  appId: "1:116758683301:web:32d863bd9b370a7da4374c"
 };
 
 // Initialize Firebase
