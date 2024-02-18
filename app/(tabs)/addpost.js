@@ -110,10 +110,7 @@ const AddPost = () => {
         });
       }
 
-       
-  
-    
-
+      
       // Reset form fields
       setTitle('');
       setDescription('');
