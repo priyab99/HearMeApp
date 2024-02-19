@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc} from 'firebase/firestore'; 
+
+
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+
+//import { firebase } from '../../config/firebaseConfig';
+//import { useRouter , useNavigation} from 'expo-router';
+//import {  } from 'firebase/firestore';
+
+
+
 import { database } from '../../config/firebaseConfig';
 
 
 
 const HomeScreen = () => {
+  
+
+  //const navigation=useNavigation();
+ // const router = useRouter();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +33,7 @@ const HomeScreen = () => {
         const fetchedPosts = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
+
         }));
 
         setPosts(fetchedPosts);
@@ -35,29 +51,67 @@ const HomeScreen = () => {
     return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
   }
 
-  const handleLike = (postId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, likes: post.likes + 1 } : post
-      )
-    );
+  const handleLike = async (postId) => {
+    try {
+      // Increment the likes in your JavaScript code
+      const updatedLikes = posts.find((post) => post.id === postId)?.likes + 1 || 1;
+  
+      // Update Firebase document
+      await updateDoc(doc(database, 'posts', postId), {
+        likes: updatedLikes,
+      });
+  
+      // Update state
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                likes: updatedLikes,
+              }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error('Error updating likes:', error.message);
+    }
   };
+  
+  const handleDislike = async (postId) => {
+    try {
+      // Increment the dislikes in your JavaScript code
+      const updatedDislikes = posts.find((post) => post.id === postId)?.dislikes + 1 || 1;
+  
+      // Update Firebase document
+      await updateDoc(doc(database, 'posts', postId), {
+        dislikes: updatedDislikes,
+      });
+  
+      // Update state
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                dislikes: updatedDislikes,
+              }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error('Error updating dislikes:', error.message);
+    }
+  };
+  
 
-  const handleDislike = (postId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, dislikes: post.dislikes + 1 } : post
-      )
-    );
-  };
 
-  const handleComment = (postId, comment) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, comments: [...post.comments, comment] } : post
-      )
-    );
-  };
+
+const handleComment = (postId) => {
+  //router.push('/component/comment', { postId });
+};
+
+
+
 
   const handleRating = (postId, rating) => {
     setPosts((prevPosts) =>
@@ -66,34 +120,46 @@ const HomeScreen = () => {
       )
     );
   };
-  
+
 
   return (
     <ScrollView style={styles.container}>
       {posts.map((post) => (
-      
-        <TouchableOpacity key={post.id} style={styles.card}>
-            <Text style={styles.userName}>{post.userName}</Text>
-            <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
 
-            
-            <Text style={styles.title}>{post.title}</Text>
-          
-         
+        <TouchableOpacity key={post.id} style={styles.card}>
+          <Text style={styles.userName}>{post.userName}</Text>
+          <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
+          <Text style={styles.category}>{post.category}</Text>
+
+
+          <Text style={styles.title}>{post.title}</Text>
+
+
+
           <Text style={styles.description}>{post.description}</Text>
           {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
 
           {/* Like, Dislike, Comment, and Rating UI */}
+
+          {/* Like and Dislike Buttons and Counts */}
           <View style={styles.actions}>
             <TouchableOpacity onPress={() => handleLike(post.id)}>
-              <Text>Like: {post.likes}</Text>
+              <Ionicons name="thumbs-up" size={24} color="blue" />
+              <Text> {post.likes}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleDislike(post.id)}>
-              <Text>Dislike: {post.dislikes}</Text>
+              <Ionicons name="thumbs-down" size={24} color="red" />
+              <Text> {post.dislikes}</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleComment(post.id, 'A new comment')}>
+          </View>
+
+          {/* Comment and Rating (existing functionality) */}
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={() => handleComment(post.id)}>
               <Text>Comment</Text>
             </TouchableOpacity>
+
+
             <TouchableOpacity onPress={() => handleRating(post.id, 5)}>
               <Text>Rate: {post.rating}</Text>
             </TouchableOpacity>

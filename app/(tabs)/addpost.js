@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet,ScrollView, Platform, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Platform, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { firebase, database, auth } from "../../config/firebaseConfig"
-import { setDoc,doc, getDoc } from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 
 
 
@@ -44,36 +44,36 @@ const AddPost = () => {
         console.warn('No image selected for upload.');
         return null;
       }
-  
+
       const response = await fetch(image);
       const blob = await response.blob();
-  
+
       const ref = firebase.storage().ref().child(`Pictures/Image_${Date.now()}`);
       const snapshot = await ref.put(blob);
-  
+
       // Get download URL after image is successfully uploaded
       const downloadURL = await snapshot.ref.getDownloadURL();
-      
+
       console.log('Image uploaded successfully:', downloadURL);
-  
+
       return downloadURL;
     } catch (error) {
       console.error('Error uploading image:', error);
       return null;
     }
   };
-  
+
 
   const handlePost = async () => {
     try {
       setUploading(true);
-  
+
       // Uploading the image and get the download URL
       const imageUrl = await uploadImage();
-  
+
       // Fix: Add a document ID for the post
       const docRef = doc(database, 'posts', `post_${Date.now()}`); // Use a timestamp for unique ID
-  
+
       if (imageUrl) {
         const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
         if (userDoc.exists()) {
@@ -83,7 +83,7 @@ const AddPost = () => {
             category,
             date,
             image: imageUrl,
-          
+
             userName: userDoc.data().username, // Include user's username in the post
           });
         } else {
@@ -94,7 +94,7 @@ const AddPost = () => {
             category,
             date,
             image: imageUrl,
-            
+
             userName: 'Unknown', // Default value if user document not found
           });
         }
@@ -105,14 +105,14 @@ const AddPost = () => {
           description,
           category,
           date,
-          
+
           userName: 'Unknown', // Default value if image is not uploaded
         });
       }
 
-       
-  
-    
+
+
+
 
       // Reset form fields
       setTitle('');
@@ -152,7 +152,12 @@ const AddPost = () => {
         <Picker.Item label="Select Category" value="" />
         <Picker.Item label="Life Struggle" value="Life Struggle" />
         <Picker.Item label="Depression" value="Depression" />
-        {/* Add more categories as needed */}
+        <Picker.Item label="Motivation" value="Motivation" />
+        <Picker.Item label="Relationships" value="Relationships" />
+        <Picker.Item label="Success Stories" value="Success Stories" />
+        <Picker.Item label="Mental Health" value="Mental Health" />
+        <Picker.Item label="Anxiety" value="Anxiety" />
+        <Picker.Item label="Personal Growth" value="Personal Growth" />
       </Picker>
       <Text style={styles.label}>Date:</Text>
       {Platform.OS === 'ios' ? (

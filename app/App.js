@@ -1,5 +1,6 @@
 import React, { createContext, useState,useContext, useEffect } from 'react';
 import { useRoutes } from 'expo-router';
+import CommentScreen from './component/comment';
 
 //creating the AuthenticatedUserContext
 
@@ -44,6 +45,7 @@ const App = () => {
     { path: '/posts', component: posts, isPublic: user }, // Making home screen public only for authenticated users
     { path: '/profile', component: profile, isPublic: user },
     { path: '/addpost', component: addpost, isPublic: user },
+    { path: '/component/comment', component: CommentScreen, isPublic: user },
     // ...other authenticated routes
 
     // Non-authenticated routes
