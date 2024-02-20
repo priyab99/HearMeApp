@@ -3,24 +3,28 @@ import { TextInput, Pressable, View, Text, StyleSheet } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import {auth} from '../config/firebaseConfig'
+import { Alert } from 'react-native';
 
 const LoginPage = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
+    
     // handling login logic here
-    if(email != "" && password != ""){
+    if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
-      .then(() => console.log("Login success"))
-      .catch((err) => Alert.alert("Login error", err.message));
+        .then(() => {
+          console.log("Login success");
+          router.replace('/posts'); // Navigate only after successful login
+        })
+        .catch((err) => {
+          Alert.alert("Login error", err.message);
+        });
     }
-    router.replace('/posts');
   };
-
-  const router = useRouter();
-
-  return (
+     return (
     <View style={styles.container}>
       <TextInput
         placeholder="Email"

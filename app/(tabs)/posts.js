@@ -1,28 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, getDocs, updateDoc, doc} from 'firebase/firestore'; 
-
-
+import { collection, getDocs, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { database ,auth} from '../../config/firebaseConfig';
+import RatingComponent from '../component/rating';
 
-
-//import { firebase } from '../../config/firebaseConfig';
-//import { useRouter , useNavigation} from 'expo-router';
-//import {  } from 'firebase/firestore';
-
-
-
-import { database } from '../../config/firebaseConfig';
 
 
 
 const HomeScreen = () => {
-  
 
-  //const navigation=useNavigation();
- // const router = useRouter();
+
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [disabledPosts, setDisabledPosts] = useState([]);
+
+
+
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -53,75 +48,90 @@ const HomeScreen = () => {
 
   const handleLike = async (postId) => {
     try {
-      // Increment the likes in your JavaScript code
-      const updatedLikes = posts.find((post) => post.id === postId)?.likes + 1 || 1;
-  
-      // Update Firebase document
-      await updateDoc(doc(database, 'posts', postId), {
-        likes: updatedLikes,
-      });
-  
-      // Update state
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
+      if (!disabledPosts.find((item) => item.postId === postId && item.action === 'like')) {
+        // Incrementing the likes
+        const updatedLikes = posts.find((post) => post.id === postId)?.likes + 1 || 1;
+
+        // Updating Firebase document
+        await updateDoc(doc(database, 'posts', postId), {
+          likes: updatedLikes,
+        });
+
+        // Updating state
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
                 ...post,
                 likes: updatedLikes,
               }
-            : post
-        )
-      );
+              : post
+          )
+        );
+
+        // Adding postId to disabledPosts with action 'like'
+        setDisabledPosts((prevDisabledPosts) => [...prevDisabledPosts, { postId, action: 'like' }]);
+
+      }
     } catch (error) {
       console.error('Error updating likes:', error.message);
     }
   };
-  
+
   const handleDislike = async (postId) => {
     try {
-      // Increment the dislikes in your JavaScript code
-      const updatedDislikes = posts.find((post) => post.id === postId)?.dislikes + 1 || 1;
-  
-      // Update Firebase document
-      await updateDoc(doc(database, 'posts', postId), {
-        dislikes: updatedDislikes,
-      });
-  
-      // Update state
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
+      if (!disabledPosts.find((item) => item.postId === postId && item.action === 'dislike')) {
+        // Incrementing the dislikes
+        const updatedDislikes = posts.find((post) => post.id === postId)?.dislikes + 1 || 1;
+
+        // Updating Firebase document
+        await updateDoc(doc(database, 'posts', postId), {
+          dislikes: updatedDislikes,
+        });
+
+        // Updating state
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
                 ...post,
                 dislikes: updatedDislikes,
               }
-            : post
-        )
-      );
+              : post
+          )
+        );
+
+        // Adding postId to disabledPosts with action 'dislike'
+        setDisabledPosts((prevDisabledPosts) => [...prevDisabledPosts, { postId, action: 'dislike' }]);
+      }
     } catch (error) {
       console.error('Error updating dislikes:', error.message);
     }
   };
+  const handleRating = async (postId, rating) => {
+    try {
+      const userId = auth.currentUser.uid; // Replace this with your actual function to get the current user ID
+      const ratingDocRef = doc(collection(database, 'ratings', postId, 'userRatings'), userId);
   
-
-
-
-const handleComment = (postId) => {
-  //router.push('/component/comment', { postId });
-};
-
-
-
-
-  const handleRating = (postId, rating) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, rating } : post
-      )
-    );
+      // Check if rating is defined
+      if (typeof rating !== 'undefined') {
+        // Update or create new rating document for the user
+        await setDoc(ratingDocRef, { rating });
+  
+        // Update local state with the new rating
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId ? { ...post, userRating: rating } : post
+          )
+        );
+      } else {
+        console.error('Error updating rating: Rating is undefined');
+      }
+    } catch (error) {
+      console.error('Error updating rating:', error.message);
+    }
   };
-
-
+  
   return (
     <ScrollView style={styles.container}>
       {posts.map((post) => (
@@ -130,12 +140,7 @@ const handleComment = (postId) => {
           <Text style={styles.userName}>{post.userName}</Text>
           <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
           <Text style={styles.category}>{post.category}</Text>
-
-
           <Text style={styles.title}>{post.title}</Text>
-
-
-
           <Text style={styles.description}>{post.description}</Text>
           {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
 
@@ -155,14 +160,8 @@ const handleComment = (postId) => {
 
           {/* Comment and Rating (existing functionality) */}
           <View style={styles.actions}>
-            <TouchableOpacity onPress={() => handleComment(post.id)}>
-              <Text>Comment</Text>
-            </TouchableOpacity>
+            <RatingComponent postId={post.id} onSubmitRating={handleRating} />
 
-
-            <TouchableOpacity onPress={() => handleRating(post.id, 5)}>
-              <Text>Rate: {post.rating}</Text>
-            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       ))}

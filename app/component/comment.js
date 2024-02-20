@@ -1,55 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, Button } from 'react-native';
 import { collection, addDoc, onSnapshot } from 'firebase/firestore';
-import { database } from '../../config/firebaseConfig';
+import { database,auth } from '../../config/firebaseConfig';
+import { useLocalSearchParams } from 'expo-router';
 
 
-const CommentScreen = ({postId}) => {
+const CommentScreen = () => {
+  const postId=useLocalSearchParams();
+  
 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const commentsRef = collection(database, 'posts', postId, 'comments');
 
   useEffect(() => {
-    // Check if postId is defined before fetching comments
-    if (postId) {
-      const unsubscribe = onSnapshot(commentsRef, (snapshot) => {
-        if (snapshot && snapshot.docs) {
-          const commentsData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'comments'), where('postID', '==', postId)),
+      (snapshot) => {
+        setComments(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      }
+    );
   
-          setComments(commentsData);
-        } else {
-          // Handle the case when snapshot or snapshot.docs is undefined
-          setComments([]);
-        }
-      });
-  
-      return unsubscribe;
-    }
-  
-    // Handle the case when postId is not defined
-    setComments([]);
+    return () => unsubscribe();
   }, [postId]);
   
   
   
-  const handleSubmitComment = async () => {
+  const handleSubmitComment = async (content) => {
     try {
-      // Add comment to Firestore
-      await addDoc(commentsRef, {
-        text: newComment,
-        // Add other fields like timestamp, author, etc.
+      await addDoc(collection(db, 'comments'), {
+        content,
+        author: auth.currentUser.uid, // Assuming you have user authentication
+        postId,
       });
-
-      // Clear input field
-      setNewComment('');
     } catch (error) {
-      console.error('Error adding comment:', error.message);
+      console.error('Error adding comment:', error);
     }
   };
+  
 
   return (
     <View style={{ flex: 1 }}>
@@ -65,16 +53,19 @@ const CommentScreen = ({postId}) => {
       </View>
 
       {/* List of Comments */}
-      <FlatList
-        data={comments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={{ borderBottomWidth: 1, borderColor: 'gray', padding: 8 }}>
-            <Text>{item.text}</Text>
-            {/* Display other comment details as needed */}
-          </View>
-        )}
-      />
+      {comments && (
+  <FlatList
+    data={comments}
+    // ... other FlatList props
+    keyExtractor={(item) => item.id}
+    renderItem={({ item }) => (
+      <View style={{ borderBottomWidth: 1, borderColor: 'gray', padding: 8 }}>
+        <Text>{item.text}</Text>
+        {/* Display other comment details as needed */}
+      </View>
+    )}
+  />
+)}
     </View>
   );
 };
