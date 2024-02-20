@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, getDocs, updateDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, updateDoc, doc, setDoc, onSnapshot } from 'firebase/firestore';
+
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { database ,auth} from '../../config/firebaseConfig';
+import { database, auth } from '../../config/firebaseConfig';
 import RatingComponent from '../component/rating';
 
 
@@ -14,33 +15,40 @@ const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [disabledPosts, setDisabledPosts] = useState([]);
+  const [visiblePosts, setVisiblePosts] = useState([]); // Empty array initially
+  const [hasMorePosts, setHasMorePosts] = useState(false);
 
 
 
 
+
+
+  // ...
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const postsCollection = collection(database, 'posts');
-        const querySnapshot = await getDocs(postsCollection);
+    const fetchPosts = () => {
+      const postsCollection = collection(database, 'posts');
 
+      const unsubscribe = onSnapshot(postsCollection, (querySnapshot) => {
         const fetchedPosts = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-
         }));
 
         setPosts(fetchedPosts);
-      } catch (error) {
-        console.error('Error fetching posts:', error.message);
-      } finally {
+        setVisiblePosts(fetchedPosts.slice(0, 5)); // Update visiblePosts after fetching
+        setHasMorePosts(fetchedPosts.length > 5); // Check for more posts
         setLoading(false);
-      }
+      });
+
+      return () => unsubscribe();
     };
 
     fetchPosts();
   }, []);
+
+  // ...
+
 
   if (loading) {
     return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
@@ -110,15 +118,15 @@ const HomeScreen = () => {
   };
   const handleRating = async (postId, rating) => {
     try {
-      const userId = auth.currentUser.uid; // Replace this with your actual function to get the current user ID
+      const userId = auth.currentUser.uid;
       const ratingDocRef = doc(collection(database, 'ratings', postId, 'userRatings'), userId);
-  
-      // Check if rating is defined
+
+      // Checking if rating is defined
       if (typeof rating !== 'undefined') {
-        // Update or create new rating document for the user
+        // creating new rating document for the user
         await setDoc(ratingDocRef, { rating });
-  
-        // Update local state with the new rating
+
+        // Updating local state with the new rating
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
             post.id === postId ? { ...post, userRating: rating } : post
@@ -131,12 +139,19 @@ const HomeScreen = () => {
       console.error('Error updating rating:', error.message);
     }
   };
-  
-  return (
-    <ScrollView style={styles.container}>
-      {posts.map((post) => (
 
-        <TouchableOpacity key={post.id} style={styles.card}>
+  const loadMorePosts = () => {
+    const newVisiblePosts = visiblePosts.concat(posts.slice(visiblePosts.length, visiblePosts.length + 5));
+    setVisiblePosts(newVisiblePosts);
+    setHasMorePosts(newVisiblePosts.length < posts.length);
+  };
+
+
+  return (
+     <ScrollView style={styles.container}>
+      {visiblePosts.length > 0 ? (
+        visiblePosts.map((post) => (
+          <TouchableOpacity key={post.id} style={styles.card}>
           <Text style={styles.userName}>{post.userName}</Text>
           <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
           <Text style={styles.category}>{post.category}</Text>
@@ -164,10 +179,22 @@ const HomeScreen = () => {
 
           </View>
         </TouchableOpacity>
-      ))}
+        ))
+      ) : (
+        <Text>No posts found.</Text>
+      )}
+      {hasMorePosts && (
+       <TouchableOpacity
+       style={styles.seeMoreButton} // Added style for the button
+       onPress={() => loadMorePosts()}
+     >
+       <Text style={styles.seeMoreButtonText}>See More</Text>
+     </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -200,6 +227,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 8,
+  },
+  seeMoreButton: {
+    padding: 10,
+    backgroundColor: '#3498db', // Example color (feel free to change)
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  seeMoreButtonText: {
+    color: '#fff', // Example color (feel free to change)
+    fontWeight: 'bold',
   },
 });
 

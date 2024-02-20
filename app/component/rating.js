@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { database, auth } from '../../config/firebaseConfig'; // Import database
-import { getDoc, doc, collection, getDocs } from 'firebase/firestore'; // Import Firestore functions
+import { database, auth } from '../../config/firebaseConfig'; 
+import { getDoc, doc } from 'firebase/firestore'; 
 
 const RatingComponent = ({ postId, onSubmitRating }) => {
   const [rating, setRating] = useState(0); // Initial rating state
@@ -12,7 +12,7 @@ const RatingComponent = ({ postId, onSubmitRating }) => {
       try {
         const userId = auth.currentUser.uid;
 
-        // Updated: Fetch user-specific rating from 'userRatings' subcollection
+        //  Fetching user-specific rating from 'userRatings' subcollection
         const ratingDocRef = doc(database, 'ratings', postId, 'userRatings', userId);
         const ratingSnapshot = await getDoc(ratingDocRef);
 
@@ -26,13 +26,13 @@ const RatingComponent = ({ postId, onSubmitRating }) => {
       }
     };
 
-    // Fetch user-specific rating on component mount
+    // Fetching user-specific rating on component mount
     fetchRating();
   }, [postId]);
 
   const handleRatingSelect = (newRating) => {
     setRating(newRating);
-    onSubmitRating(postId, newRating); // Pass postId and rating to the callback
+    onSubmitRating(postId, newRating); // Passing postId and rating to the callback
   };
 
   return (

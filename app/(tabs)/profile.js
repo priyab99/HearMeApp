@@ -34,7 +34,7 @@ const Profile = () => {
           <Text style={styles.text}>Name: {user.name}</Text>
           <Text style={styles.text}>Email: {user.email}</Text>
           <Text style={styles.text}>Username: {user.username}</Text>
-          {/* Display other user information as needed */}
+          
         </>
       ) : (
         <Text style={styles.loadingText}>Loading user information...</Text>

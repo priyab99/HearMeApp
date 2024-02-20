@@ -46,6 +46,8 @@ const App = () => {
     { path: '/profile', component: profile, isPublic: user },
     { path: '/addpost', component: addpost, isPublic: user },
     { path: '/component/rating', component: RatingComponent, isPublic: user },
+   // { path: '/component/comment', component: CommentScreen, isPublic: user },
+
     
     
 

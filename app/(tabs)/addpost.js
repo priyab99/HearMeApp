@@ -110,11 +110,7 @@ const AddPost = () => {
         });
       }
 
-
-
-
-
-      // Reset form fields
+     // Reset form fields
       setTitle('');
       setDescription('');
       setCategory('');
