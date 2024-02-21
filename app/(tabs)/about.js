@@ -7,7 +7,7 @@ const About = () => {
   
  return (
     <View style={styles.container}>
-      <Text style={styles.title}>About Us</Text>
+      <Text style={styles.title}>About HearMe</Text>
       <Text style={styles.description}>
         HearMe app is a platform where one can share what are they going through their day to day life. The life-struggles they share is one way to express them.
       </Text>

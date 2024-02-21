@@ -38,7 +38,7 @@ export default () => {
           name="about"
           options={{
             tabBarLabel: 'About',
-            headerTitle: 'About HearMe',
+            headerTitle: 'About',
             tabBarIcon: ({ color }) => (
               <Ionicons name="information-circle-outline" size={24} color={color} />
             ),

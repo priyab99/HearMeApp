@@ -19,6 +19,8 @@ const Profile = () => {
   });
   const [locationError, setLocationError] = useState(null);
 
+
+//fetching user related data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -37,6 +39,7 @@ const Profile = () => {
     fetchUserData();
   }, []);
 
+  //asking location permission from user
   const userLocation = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();

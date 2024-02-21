@@ -31,8 +31,8 @@ const HomeScreen = () => {
         }));
 
         setPosts(fetchedPosts);
-        setVisiblePosts(fetchedPosts.slice(0, 5)); // Update visiblePosts after fetching
-        setHasMorePosts(fetchedPosts.length > 5); // Check for more posts
+        setVisiblePosts(fetchedPosts.slice(0, 5)); // Updating visiblePosts after fetching
+        setHasMorePosts(fetchedPosts.length > 5); // Checking for more posts
         setLoading(false);
       });
 

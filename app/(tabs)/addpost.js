@@ -51,7 +51,7 @@ const AddPost = () => {
       const ref = firebase.storage().ref().child(`Pictures/Image_${Date.now()}`);
       const snapshot = await ref.put(blob);
 
-      // Get download URL after image is successfully uploaded
+      // Getting download URL after image is successfully uploaded
       const downloadURL = await snapshot.ref.getDownloadURL();
 
       console.log('Image uploaded successfully:', downloadURL);
@@ -71,8 +71,8 @@ const AddPost = () => {
       // Uploading the image and get the download URL
       const imageUrl = await uploadImage();
 
-      // Fix: Add a document ID for the post
-      const docRef = doc(database, 'posts', `post_${Date.now()}`); // Use a timestamp for unique ID
+      // Adding a document ID for the post
+      const docRef = doc(database, 'posts', `post_${Date.now()}`); // Using a timestamp for unique ID
 
       if (imageUrl) {
         const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
@@ -180,7 +180,7 @@ const AddPost = () => {
       )}
 
       {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
-      <Button title='Select Image' onPress={pickImage} />
+      <Button style={{marginBottom: 10}} title='Select Image' onPress={pickImage} />
       {!uploading ? <Button title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
 
 
