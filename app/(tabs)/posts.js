@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, updateDoc, doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { collection, updateDoc, doc, setDoc, onSnapshot ,orderBy, query} from 'firebase/firestore';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
@@ -19,17 +19,12 @@ const HomeScreen = () => {
   const [hasMorePosts, setHasMorePosts] = useState(false);
 
 
-
-
-
-
-  // ...
-
-  useEffect(() => {
+     useEffect(() => {
     const fetchPosts = () => {
       const postsCollection = collection(database, 'posts');
+      const q = query(postsCollection, orderBy('date', 'desc'));
 
-      const unsubscribe = onSnapshot(postsCollection, (querySnapshot) => {
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const fetchedPosts = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),

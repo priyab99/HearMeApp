@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter} from 'expo-router';
+import { useRouter } from 'expo-router';
+import WebView from 'react-native-webview';
 
 import { auth, database } from '../../config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
@@ -34,12 +35,21 @@ const Profile = () => {
           <Text style={styles.text}>Name: {user.name}</Text>
           <Text style={styles.text}>Email: {user.email}</Text>
           <Text style={styles.text}>Username: {user.username}</Text>
+
           
+            <WebView
+              style={styles.videoContainer}
+              javaScriptEnabled={true}
+              source={{ uri: 'https://www.youtube.com/watch?v=yg8lwoGx_mM' }}
+            />
+          
+
+
         </>
       ) : (
         <Text style={styles.loadingText}>Loading user information...</Text>
       )}
-      <TouchableOpacity style={styles.logoutButton} onPress={()=>router.push('/')}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/')}>
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
     </View>
@@ -73,6 +83,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  videoContainer:{
+    height: 100, // Set the desired height for the video container
+    width: 300,
+  }
 });
 
 export default Profile;

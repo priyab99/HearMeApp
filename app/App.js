@@ -56,7 +56,7 @@ const App = () => {
 
     // Non-authenticated routes
     { path: '/', component: LoginScreen },
-    { path: '/register', component: SignupScreen },
+    { path: '/register', component: SignupScreen }
   ]);
 
   return routes;
