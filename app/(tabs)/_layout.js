@@ -34,6 +34,16 @@ export default () => {
           ),
         }}
       />
+       <Tabs.Screen
+          name="about"
+          options={{
+            tabBarLabel: 'About',
+            headerTitle: 'About HearMe',
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="information-circle-outline" size={24} color={color} />
+            ),
+          }}
+        />
     </Tabs>
   );
 };
