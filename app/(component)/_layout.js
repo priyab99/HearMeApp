@@ -1,9 +1,9 @@
 import { Stack } from "expo-router";
 
 <Stack.Screen
-	name="HearMe"
+	name="Comment"
 	options={{
-		presentation: 'modal',
+		presentation: 'HearMe',
 		headerLeft: () => <Button title="Close" onPress={() => router.back()} />
 	}}
 />

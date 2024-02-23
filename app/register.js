@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TextInput, Pressable, Alert } from "react-native";
+import { Text, View, TextInput, Pressable, Alert, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
-import { doc, setDoc, getDocs ,collection} from "firebase/firestore";
+import { doc, setDoc, getDocs, collection } from "firebase/firestore";
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -12,6 +12,7 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
+
 
   useEffect(() => {
     const checkUsernameAvailability = async () => {
@@ -74,7 +75,7 @@ const RegisterPage = () => {
         email,
         username,
       });
-      
+
 
       router.replace('/');
     } catch (error) {
@@ -92,12 +93,21 @@ const RegisterPage = () => {
       borderWidth: 1,
       marginBottom: 10,
       paddingHorizontal: 10,
+      width: 250,
+    },
+    image: {
       width: 200,
+      height: 100,
+      marginBottom: 20,
     },
   };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      {/* Displaying the message */}
+      <Text style={{ fontSize: 25, marginBottom: 20 }}>
+        Sign up to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
+      </Text>
       <TextInput
         placeholder="Name"
         value={name}
@@ -116,7 +126,7 @@ const RegisterPage = () => {
         onChangeText={(text) => setUsername(text)}
         style={styles.input}
       />
-        <TextInput
+      <TextInput
         placeholder="Password"
         value={password}
         onChangeText={(text) => setPassword(text)}
@@ -145,7 +155,7 @@ const RegisterPage = () => {
           backgroundColor: 'blue',
           justifyContent: 'center',
           alignItems: 'center',
-          width: 80,
+          width: 250,
           marginBottom: 10
         }}>
         <Text style={{ color: 'white' }}>Register</Text>

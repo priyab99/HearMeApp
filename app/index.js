@@ -34,6 +34,9 @@ const LoginPage = () => {
   
      return (
     <View style={styles.container}>
+       <Text style={{ fontSize: 25, marginBottom: 20 }}>
+        Login to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
+      </Text>
       <TextInput
         placeholder="Email"
         value={email}
@@ -54,7 +57,7 @@ const LoginPage = () => {
       >
         <Text style={styles.loginButtonText}>Login</Text>
       </Pressable>
-      <Text style={styles.firstTimeText}>First time on HearMe?</Text>
+      <Text style={styles.firstTimeText}>First time on <Text style={{ fontWeight: 'bold', fontStyle: 'italic' }}>HearMe?</Text></Text>
 
       <Link href="/register" asChild>
         <Pressable>
@@ -78,7 +81,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-    width: 200,
+    width: 250,
   },
   loginButton: {
     height: 40,
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 80,
+    width: 250,
     marginBottom: 10,
   },
   loginButtonText: {
@@ -94,11 +97,14 @@ const styles = StyleSheet.create({
   },
   firstTimeText: {
     marginBottom: 10,
-    fontSize: 14,
+    fontSize: 20,
     color: 'gray',
+    marginTop: 45,
+
   },
   createAccountText: {
     color: 'blue',
+    fontSize: 18,
   },
 });
 
