@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, updateDoc, doc, setDoc, onSnapshot ,orderBy, query} from 'firebase/firestore';
+import { collection, updateDoc, doc, setDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
-import RatingComponent from '../component/rating';
+import RatingComponent from '../(component)/rating';
+
+import { useRouter} from 'expo-router';
 
 
 
@@ -17,9 +19,11 @@ const HomeScreen = () => {
   const [disabledPosts, setDisabledPosts] = useState([]);
   const [visiblePosts, setVisiblePosts] = useState([]); // Empty array initially
   const [hasMorePosts, setHasMorePosts] = useState(false);
+  const router=useRouter();
+  
 
 
-     useEffect(() => {
+  useEffect(() => {
     const fetchPosts = () => {
       const postsCollection = collection(database, 'posts');
       const q = query(postsCollection, orderBy('date', 'desc'));
@@ -111,6 +115,9 @@ const HomeScreen = () => {
       console.error('Error updating dislikes:', error.message);
     }
   };
+
+
+
   const handleRating = async (postId, rating) => {
     try {
       const userId = auth.currentUser.uid;
@@ -143,48 +150,59 @@ const HomeScreen = () => {
 
 
   return (
-     <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}>
       {visiblePosts.length > 0 ? (
         visiblePosts.map((post) => (
           <TouchableOpacity key={post.id} style={styles.card}>
-          <Text style={styles.userName}>{post.userName}</Text>
-          <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
-          <Text style={styles.category}>{post.category}</Text>
-          <Text style={styles.title}>{post.title}</Text>
-          <Text style={styles.description}>{post.description}</Text>
-          {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
+            <Text style={styles.userName}>{post.userName}</Text>
+            <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
+            <Text style={styles.category}>{post.category}</Text>
+            <Text style={styles.title}>{post.title}</Text>
+            <Text style={styles.description}>{post.description}</Text>
+            {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
 
-          {/* Like, Dislike, Comment, and Rating UI */}
+            {/* Like, Dislike, Comment, and Rating UI */}
 
-          {/* Like and Dislike Buttons and Counts */}
-          <View style={styles.actions}>
-            <TouchableOpacity onPress={() => handleLike(post.id)}>
-              <Ionicons name="thumbs-up" size={24} color="blue" />
-              <Text> {post.likes}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDislike(post.id)}>
-              <Ionicons name="thumbs-down" size={24} color="red" />
-              <Text> {post.dislikes}</Text>
-            </TouchableOpacity>
-          </View>
+            {/* Like and Dislike Buttons and Counts */}
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={() => handleLike(post.id)}>
+                <Ionicons name="thumbs-up" size={24} color="blue" />
+                <Text> {post.likes}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDislike(post.id)}>
+                <Ionicons name="thumbs-down" size={24} color="red" />
+                <Text> {post.dislikes}</Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* Comment and Rating (existing functionality) */}
-          <View style={styles.actions}>
-            <RatingComponent postId={post.id} onSubmitRating={handleRating} />
+            {/* Comment and Rating (existing functionality) */}
 
-          </View>
-        </TouchableOpacity>
+
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={()=>router.push({ pathname: '/comment', params: { postId: post.id } })}>
+                
+                 <Text>Comment</Text>
+                
+
+               
+              </TouchableOpacity>
+
+
+              <RatingComponent postId={post.id} onSubmitRating={handleRating} />
+
+            </View>
+          </TouchableOpacity>
         ))
       ) : (
         <Text>No posts found.</Text>
       )}
       {hasMorePosts && (
-       <TouchableOpacity
-       style={styles.seeMoreButton} // Added style for the button
-       onPress={() => loadMorePosts()}
-     >
-       <Text style={styles.seeMoreButtonText}>See More</Text>
-     </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.seeMoreButton} // Added style for the button
+          onPress={() => loadMorePosts()}
+        >
+          <Text style={styles.seeMoreButtonText}>See More</Text>
+        </TouchableOpacity>
       )}
     </ScrollView>
   );

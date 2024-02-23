@@ -3,8 +3,7 @@ import { useRoutes } from 'expo-router';
 
 
 //creating the AuthenticatedUserContext
-
-const AuthenticatedUserContext=createContext({});
+ export const AuthenticatedUserContext=createContext({});
 
 const AuthenticatedUserProvider=({children})=>{
     const [user, setUser]=useState(null);
@@ -42,22 +41,18 @@ const App = () => {
   }
   const routes = useRoutes(() => [
     // Authenticated routes
-    { path: '/posts', component: posts, isPublic: user }, // Making home screen public only for authenticated users
-    { path: '/profile', component: profile, isPublic: user },
-    { path: '/addpost', component: addpost, isPublic: user },
-    { path: '/component/rating', component: RatingComponent, isPublic: user },
-   // { path: '/component/comment', component: CommentScreen, isPublic: user },
-
-    
-    
-
-   
+    { path: '/posts', component: PostsScreen, isPublic: user },
+    { path: '/profile', component: ProfileScreen, isPublic: user },
+    { path: '/addpost', component: AddPostScreen, isPublic: user },
+    { path: '/rating', component: RatingComponent, isPublic: user },
+   { path: '/comment', component: CommentScreen, isPublic: user },
     // ...other authenticated routes
-
+  
     // Non-authenticated routes
     { path: '/', component: LoginScreen },
     { path: '/register', component: SignupScreen }
   ]);
+  
 
   return routes;
 };

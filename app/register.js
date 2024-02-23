@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { doc, setDoc, getDocs ,collection} from "firebase/firestore";
 
 const RegisterPage = () => {
@@ -19,12 +19,13 @@ const RegisterPage = () => {
     const checkUsernameAvailability = async () => {
       if (username.trim() !== "") {
         try {
-          console.log("Checking username availability for:", username);
+          setIsUsernameAvailable(true);
+          //console.log("Checking username availability for:", username);
           const querySnapshot = await getDocs(collection(database, 'users'));
           //console.log("Query Snapshot:", querySnapshot.docs.map(doc => doc.data()));
           querySnapshot.forEach((doc) => {
             if (doc.data().username === username) {
-              console.log("Username is taken");
+              //console.log("Username is taken");
               setIsUsernameAvailable(false);
             }
           });
@@ -62,6 +63,8 @@ const RegisterPage = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      await updateProfile(user, { displayName: name });
+
       // Sending email verification
       await sendEmailVerification(user);
 
@@ -75,6 +78,7 @@ const RegisterPage = () => {
         phoneNumber,
         username,
       });
+      
 
       router.replace('/posts');
     } catch (error) {
