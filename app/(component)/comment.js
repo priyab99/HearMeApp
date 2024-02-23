@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, FlatList, Button } from 'react-native';
 
 import { database, auth } from '../../config/firebaseConfig';
-import { collection, query, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc,getDoc, doc } from 'firebase/firestore';
 import { useLocalSearchParams } from 'expo-router';
 import { AuthenticatedUserContext } from '../App';
 
@@ -10,8 +10,27 @@ const CommentScreen = () => {
   const { postId } = useLocalSearchParams();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [user, setUser] = useState(null);
 
-  const {user}=useContext(AuthenticatedUserContext)
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
+
+        if (userDoc.exists()) {
+          setUser(userDoc.data());
+        } else {
+          console.error('User document not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error.message);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -45,10 +64,11 @@ const CommentScreen = () => {
 
       await addDoc(commentsCollectionRef, {
         content: String(content),
-        author: userId,
+        author: userId ,
+        name: user?.name || 'Anonymous',
         createdAt: new Date(),
       });
-
+      setNewComment('');
       // Additional logic if needed
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -75,7 +95,7 @@ const CommentScreen = () => {
         renderItem={({ item }) => (
           <View style={{ padding: 8, borderBottomWidth: 1, borderBottomColor: 'gray' }}>
             <Text>{item.content}</Text>
-            <Text>By:{user?.name || item.author} </Text>
+            <Text>By: {item?.name || 'Anonymous'} </Text>
           </View>
         )}
       />

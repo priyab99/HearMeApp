@@ -10,8 +10,6 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [imageURL, setImageURL] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [username, setUsername] = useState('');
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
 
@@ -74,13 +72,11 @@ const RegisterPage = () => {
       await setDoc(doc(database, 'users', user.uid), {
         name,
         email,
-        imageURL,
-        phoneNumber,
         username,
       });
       
 
-      router.replace('/posts');
+      router.replace('/');
     } catch (error) {
       Alert.alert(error.message);
     }
@@ -132,18 +128,6 @@ const RegisterPage = () => {
         value={confirmPassword}
         onChangeText={(text) => setConfirmPassword(text)}
         secureTextEntry
-        style={styles.input}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter image URL"
-        value={imageURL}
-        onChangeText={(text) => setImageURL(text)}
-      />
-      <TextInput
-        placeholder="Phone Number"
-        value={phoneNumber}
-        onChangeText={(text) => setPhoneNumber(text)}
         style={styles.input}
       />
       {/* Adding a message indicating if the username is available or not */}

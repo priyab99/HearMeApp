@@ -1,5 +1,6 @@
 import React, { createContext, useState,useContext, useEffect } from 'react';
 import { useRoutes } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
 
 
 //creating the AuthenticatedUserContext
@@ -28,6 +29,8 @@ const App = () => {
     );
     return unsubscribeAuth; // Unsubscribing auth listener on unmount
   }, [user]);
+
+  
 
   // Conditional rendering based on authentication state
   if (isLoading) {

@@ -11,19 +11,27 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    
-    // handling login logic here
+    // Handling login logic here
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          console.log("Login success");
-          router.replace('/posts'); // Navigate only after successful login
+        .then((userCredential) => {
+          const user = userCredential.user;
+  
+          // Check if the user's email is verified
+          if (user.emailVerified) {
+            console.log("Login success");
+            router.replace('/posts'); // Navigate to the Posts page after successful login
+          } else {
+            // If email is not verified, show an alert or perform some action
+            Alert.alert("Email not verified", "Please verify your email before logging in.");
+          }
         })
         .catch((err) => {
           Alert.alert("Login error", err.message);
         });
     }
   };
+  
      return (
     <View style={styles.container}>
       <TextInput
