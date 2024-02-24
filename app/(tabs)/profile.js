@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
@@ -68,14 +68,25 @@ const Profile = () => {
     <View style={styles.container}>
       {user ? (
         <>
-          <Text style={styles.text}>Name: {user.name}</Text>
-          <Text style={styles.text}>Email: {user.email}</Text>
-          <Text style={styles.text}>Username: {user.username}</Text>
-          {locationError && <Text style={styles.error}>{locationError}</Text>}
+         <View style={styles.profileInfo}>
+            <Text style={styles.title}>
+              <Ionicons name="person" size={24} color="black" /> My Account
+            </Text>
+            <Text style={styles.text}>
+              <Ionicons name="person-outline" size={20} color="gray" /> {user.name}
+            </Text>
+            <Text style={styles.text}>
+              <Ionicons name="mail-outline" size={20} color="gray" /> {user.email}
+            </Text>
+            <Text style={styles.text}>
+              <Ionicons name="at-outline" size={20} color="gray" /> Uername: {user.username}
+            </Text>
+            {locationError && <Text style={styles.error}>{locationError}</Text>}
+          </View>
           <MapView style={styles.map} region={mapRegion}>
             <Marker coordinate={mapRegion} title="My Location" />
           </MapView>
-           </>
+        </>
       ) : (
         <Text style={styles.loadingText}>Loading user information...</Text>
       )}
@@ -89,13 +100,20 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    backgroundColor: '#fff',
+  },
+  profileInfo: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   text: {
     marginBottom: 10,
-    fontSize: 18,
+    fontSize: 20,
   },
   loadingText: {
     fontSize: 16,
@@ -104,19 +122,20 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 20,
-    padding: 10,
+    padding: 15,
     backgroundColor: 'red',
     borderRadius: 8,
+    alignItems: 'center',
   },
   logoutButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
   },
- 
   map: {
-    width: '100%',
+    flex: 1,
     height: 200,
+    marginBottom: 20,
   },
   error: {
     color: 'red',

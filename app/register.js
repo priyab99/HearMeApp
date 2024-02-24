@@ -94,12 +94,7 @@ const RegisterPage = () => {
       marginBottom: 10,
       paddingHorizontal: 10,
       width: 250,
-    },
-    image: {
-      width: 200,
-      height: 100,
-      marginBottom: 20,
-    },
+    }
   };
 
   return (
@@ -156,9 +151,9 @@ const RegisterPage = () => {
           justifyContent: 'center',
           alignItems: 'center',
           width: 250,
-          marginBottom: 10
+          marginBottom: 10,
         }}>
-        <Text style={{ color: 'white' }}>Register</Text>
+        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', }}>Register</Text>
       </Pressable>
     </View>
   );

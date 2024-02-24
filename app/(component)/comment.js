@@ -80,7 +80,7 @@ const CommentScreen = () => {
       {/* Comment Input Field */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <TextInput
-          style={{ flex: 1, borderWidth: 1, borderColor: 'gray', padding: 8, marginRight: 8 }}
+          style={{ flex: 1, borderWidth: 1, borderColor: 'gray', padding: 8, marginRight: 8, marginTop: 10 , marginLeft: 5}}
           placeholder="Add a comment..."
           value={newComment}
           onChangeText={(text) => setNewComment(text)}

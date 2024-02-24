@@ -91,9 +91,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 250,
     marginBottom: 10,
+    fontSize: 10
   },
   loginButtonText: {
     color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   firstTimeText: {
     marginBottom: 10,

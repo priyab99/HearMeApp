@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {  Text, TextInput, Button, StyleSheet, ScrollView, Platform, Image,  ActivityIndicator } from 'react-native';
+import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -110,7 +110,7 @@ const AddPost = () => {
         });
       }
 
-     // Reset form fields
+      // Reset form fields
       setTitle('');
       setDescription('');
       setCategory('');
@@ -124,16 +124,22 @@ const AddPost = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -150}
+    >
+    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
       <Text style={styles.heading}>Add Your Post</Text>
       <TextInput
         style={styles.input}
         placeholder="Title"
         onChangeText={(text) => setTitle(text)}
         value={title}
+        keyboardShouldPersistTaps="handled"
       />
       <TextInput
-        style={styles.input}
+        style={styles.desInput}
         placeholder="Description"
         onChangeText={(text) => setDescription(text)}
         value={description}
@@ -180,44 +186,80 @@ const AddPost = () => {
       )}
 
       {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
-      <Button style={{marginBottom: 10}} title='Select Image' onPress={pickImage} />
-      {!uploading ? <Button title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
+      <Button style={styles.button} title='Select Image' onPress={pickImage} />
+      {!uploading ? <Button style={styles.button} title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
+      <TouchableOpacity style={styles.button} onPress={handlePost}>
+        <Text style={styles.buttonText}>Post</Text>
+      </TouchableOpacity>
 
-
-      <Button title="Post" onPress={handlePost} />
     </ScrollView>
+      </KeyboardAvoidingView >
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
+    paddingTop: 40,
+    paddingBottom: 50,
+    backgroundColor: '#fff',
   },
   heading: {
     fontSize: 24,
-    marginBottom: 16,
+    marginBottom: 20,
+    fontWeight: 'bold', // Make heading bold
   },
   input: {
     height: 40,
     borderColor: 'gray',
+    maxHeight: 40,
     borderWidth: 1,
-    marginBottom: 16,
-    padding: 8,
+    marginBottom: 20,
+    padding: 10,
+    borderRadius: 8,
     width: '100%',
+    backgroundColor: '#f5f5f5', // Set background color for input
+  },
+  desInput:{
+    height: 'auto',  // Allow dynamic height
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    padding: 10,
+    borderRadius: 8,
+    width: '100%',
+    backgroundColor: '#f5f5f5',
   },
   label: {
     fontSize: 16,
     marginBottom: 8,
+    fontWeight: 'bold', // Make label bold
   },
   image: {
-    width: 200,
+    width: '100%', // Make image take full width
     height: 200,
     resizeMode: 'cover',
-    marginBottom: 16,
+    marginBottom: 20,
+    borderRadius: 8, // Apply border radius to the image
+  },
+  button: {
+    marginBottom: 20,
+    backgroundColor: '#007BFF', // Set button background color
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10
+  },
+  buttonText: {
+    color: '#fff', // Set button text color
+    fontSize: 18,
+    fontWeight: 'bold', // Make button text bold
   },
 });
+
 
 export default AddPost;
