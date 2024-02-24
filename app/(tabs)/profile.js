@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-
 import { auth, database } from '../../config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -20,7 +19,7 @@ const Profile = () => {
   const [locationError, setLocationError] = useState(null);
 
 
-//fetching user related data
+   //fetching user related data
   useEffect(() => {
     const fetchUserData = async () => {
       try {

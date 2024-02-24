@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { collection, updateDoc, doc, setDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
-
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
 import RatingComponent from '../(component)/rating';
-
 import { useRouter} from 'expo-router';
-
-
 
 
 const HomeScreen = () => {
@@ -17,7 +13,7 @@ const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [disabledPosts, setDisabledPosts] = useState([]);
-  const [visiblePosts, setVisiblePosts] = useState([]); // Empty array initially
+  const [visiblePosts, setVisiblePosts] = useState([]); 
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const router=useRouter();
   
@@ -45,8 +41,6 @@ const HomeScreen = () => {
 
     fetchPosts();
   }, []);
-
-  // ...
 
 
   if (loading) {
@@ -184,10 +178,7 @@ const HomeScreen = () => {
               <TouchableOpacity onPress={()=>router.push({ pathname: '/comment', params: { postId: post.id } })}>
                 
                  <Text>Comment</Text>
-                
-
-               
-              </TouchableOpacity>
+                </TouchableOpacity>
 
 
               <RatingComponent postId={post.id} onSubmitRating={handleRating} />
@@ -200,7 +191,7 @@ const HomeScreen = () => {
       )}
       {hasMorePosts && (
         <TouchableOpacity
-          style={styles.seeMoreButton} // Added style for the button
+          style={styles.seeMoreButton} 
           onPress={() => loadMorePosts()}
         >
           <Text style={styles.seeMoreButtonText}>See More</Text>
@@ -245,14 +236,14 @@ const styles = StyleSheet.create({
   },
   seeMoreButton: {
     padding: 10,
-    backgroundColor: '#3498db', // Example color (feel free to change)
+    backgroundColor: '#3498db', 
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 10,
   },
   seeMoreButtonText: {
-    color: '#fff', // Example color (feel free to change)
+    color: '#fff', 
     fontWeight: 'bold',
   },
 });

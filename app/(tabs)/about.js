@@ -6,7 +6,7 @@ const About = () => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text style={styles.title}>About HearMe</Text>
+        <Text style={styles.title}>About <Text style={{  fontStyle: 'italic', color: 'purple' }}>HearMe</Text></Text>
         <Text style={styles.description}>
           Welcome to HearMe, a platform where individuals can share their day-to-day experiences and life struggles, providing a space for self-expression and support.
         </Text>

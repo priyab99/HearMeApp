@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, FlatList, Button } from 'react-native';
-
 import { database, auth } from '../../config/firebaseConfig';
 import { collection, query, orderBy, onSnapshot, addDoc,getDoc, doc } from 'firebase/firestore';
-import { useLocalSearchParams } from 'expo-router';
-import { AuthenticatedUserContext } from '../App';
+import { useLocalSearchParams , Stack} from 'expo-router';
 
 const CommentScreen = () => {
   const { postId } = useLocalSearchParams();
@@ -69,14 +67,15 @@ const CommentScreen = () => {
         createdAt: new Date(),
       });
       setNewComment('');
-      // Additional logic if needed
     } catch (error) {
       console.error('Error adding comment:', error);
     }
   };
 
   return (
+    
     <View style={{ flex: 1 }}>
+      <Stack.Screen options={{ headerTitle: `Comment` }} />
       {/* Comment Input Field */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <TextInput
@@ -88,7 +87,7 @@ const CommentScreen = () => {
         <Button title="Submit" onPress={() => handleSubmitComment(newComment)} />
       </View>
 
-      {/* Display Comments */}
+      {/* Displaying Comments */}
       <FlatList
         data={comments}
         keyExtractor={(item) => item.id}

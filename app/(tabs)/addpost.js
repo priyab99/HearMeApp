@@ -83,7 +83,6 @@ const AddPost = () => {
             category,
             date,
             image: imageUrl,
-
             userName: userDoc.data().username, // Include user's username in the post
           });
         } else {
@@ -105,12 +104,11 @@ const AddPost = () => {
           description,
           category,
           date,
-
           userName: 'Unknown', // Default value if image is not uploaded
         });
       }
 
-      // Reset form fields
+      // Resetting form fields
       setTitle('');
       setDescription('');
       setCategory('');
@@ -212,7 +210,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     marginBottom: 20,
-    fontWeight: 'bold', // Make heading bold
+    fontWeight: 'bold', 
   },
   input: {
     height: 40,
@@ -223,10 +221,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     width: '100%',
-    backgroundColor: '#f5f5f5', // Set background color for input
+    backgroundColor: '#f5f5f5', 
   },
   desInput:{
-    height: 'auto',  // Allow dynamic height
+    height: 'auto',  
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 20,
@@ -238,18 +236,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    fontWeight: 'bold', // Make label bold
+    fontWeight: 'bold', 
   },
   image: {
-    width: '100%', // Make image take full width
+    width: '100%', 
     height: 200,
     resizeMode: 'cover',
     marginBottom: 20,
-    borderRadius: 8, // Apply border radius to the image
+    borderRadius: 8, 
   },
   button: {
     marginBottom: 20,
-    backgroundColor: '#007BFF', // Set button background color
+    backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -257,9 +255,9 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   buttonText: {
-    color: '#fff', // Set button text color
+    color: '#fff', 
     fontSize: 18,
-    fontWeight: 'bold', // Make button text bold
+    fontWeight: 'bold', 
   },
 });
 

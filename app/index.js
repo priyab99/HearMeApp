@@ -17,12 +17,12 @@ const LoginPage = () => {
         .then((userCredential) => {
           const user = userCredential.user;
   
-          // Check if the user's email is verified
+          // Checking if the user's email is verified
           if (user.emailVerified) {
             console.log("Login success");
-            router.replace('/posts'); // Navigate to the Posts page after successful login
+            router.replace('/posts'); // Navigating to the Home Screen after successful login
           } else {
-            // If email is not verified, show an alert or perform some action
+            // If email is not verified, showing an alert or perform some action
             Alert.alert("Email not verified", "Please verify your email before logging in.");
           }
         })

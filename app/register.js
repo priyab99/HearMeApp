@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TextInput, Pressable, Alert, Image } from "react-native";
+import { Text, View, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
@@ -12,7 +12,7 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
-
+  const router = useRouter();
 
   useEffect(() => {
     const checkUsernameAvailability = async () => {
@@ -21,14 +21,12 @@ const RegisterPage = () => {
           setIsUsernameAvailable(true);
           //console.log("Checking username availability for:", username);
           const querySnapshot = await getDocs(collection(database, 'users'));
-          //console.log("Query Snapshot:", querySnapshot.docs.map(doc => doc.data()));
           querySnapshot.forEach((doc) => {
             if (doc.data().username === username) {
               //console.log("Username is taken");
               setIsUsernameAvailable(false);
             }
           });
-          //console.log("Is Username Available:", isUsernameAvailable);
         } catch (error) {
           console.error("Error checking username availability:", error.message);
         }
@@ -62,7 +60,16 @@ const RegisterPage = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await updateProfile(user, { displayName: name });
+      //await updateProfile(user, { displayName: name });
+      updateProfile(auth.currentUser, {
+        displayName: name
+      }).then(() => {
+        // Profile updated!
+        // ...
+      }).catch((error) => {
+        // An error occurred
+        // ...
+      });
 
       // Sending email verification
       await sendEmailVerification(user);
@@ -75,15 +82,14 @@ const RegisterPage = () => {
         email,
         username,
       });
-
-
+      //redirecting to login
       router.replace('/');
     } catch (error) {
       Alert.alert(error.message);
     }
   };
 
-  const router = useRouter();
+ 
 
   const styles = {
     input: {
@@ -141,7 +147,6 @@ const RegisterPage = () => {
           {isUsernameAvailable ? 'Username is available' : 'Username is taken'}
         </Text>
       )}
-      {/* ... other input fields */}
       <Pressable
         onPress={handleRegister}
         style={{
