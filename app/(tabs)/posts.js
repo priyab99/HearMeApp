@@ -65,16 +65,18 @@ const HomeScreen = () => {
         });
 
         // Updating state
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
+        setPosts((prevPosts) => {
+          const updatedPosts = prevPosts.map((post) =>
             post.id === postId
               ? {
-                ...post,
-                likes: updatedLikes,
-              }
+                  ...post,
+                  likes: updatedLikes,
+                }
               : post
-          )
-        );
+          );
+          return updatedPosts;
+        });
+        
 
         // Adding postId to disabledPosts with action 'like'
         setDisabledPosts((prevDisabledPosts) => [...prevDisabledPosts, { postId, action: 'like' }]);

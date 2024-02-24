@@ -186,7 +186,9 @@ const AddPost = () => {
       )}
 
       {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
-      <Button style={styles.button} title='Select Image' onPress={pickImage} />
+     <TouchableOpacity style={styles.button} onPress={pickImage}><Text style={styles.buttonText}>Select Image</Text></TouchableOpacity>
+
+
       {!uploading ? <Button style={styles.button} title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
       <TouchableOpacity style={styles.button} onPress={handlePost}>
         <Text style={styles.buttonText}>Post</Text>
