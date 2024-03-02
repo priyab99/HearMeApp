@@ -49,6 +49,7 @@ const App = () => {
     { path: '/addpost', component: AddPostScreen, isPublic: user },
     { path: '/rating', component: RatingComponent, isPublic: user },
     { path: '/comment', component: CommentScreen, isPublic: user },
+   
 
 
     // Non-authenticated routes

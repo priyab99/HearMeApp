@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TextInput, Pressable, Alert } from "react-native";
+import { Text, View, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, StyleSheet,  Keyboard } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
@@ -12,6 +12,8 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [username, setUsername] = useState('');
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
+  const [phoneNumber, setPhoneNumber] = useState('');
+
   const router = useRouter();
 
   useEffect(() => {
@@ -37,10 +39,19 @@ const RegisterPage = () => {
     checkUsernameAvailability();
   }, [username]);
 
+  const isValidPhoneNumber = () => {
+    if (phoneNumber.trim() === '') {
+      return true; // Optional: Phone number is not required
+    }
+    
+    const phoneNumberRegex = /^\d{11}$/; // a valid phone number has 11 digits
+    return phoneNumberRegex.test(phoneNumber);
+  };
+
   const handleRegister = async () => {
     try {
       // Basic form validation
-      if (!email || !password || !name || !username) {
+      if (!email || !password || !name || !username || !isValidPhoneNumber()) {
         Alert.alert("Please fill in all fields");
         return;
       }
@@ -89,9 +100,14 @@ const RegisterPage = () => {
     }
   };
 
- 
 
-  const styles = {
+
+  const styles =StyleSheet.create( {
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     input: {
       height: 40,
       borderRadius: 10,
@@ -101,66 +117,79 @@ const RegisterPage = () => {
       paddingHorizontal: 10,
       width: 250,
     }
-  };
-
+  });
+  
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {/* Displaying the message */}
-      <Text style={{ fontSize: 25, marginBottom: 20 }}>
-        Sign up to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
-      </Text>
-      <TextInput
-        placeholder="Name"
-        value={name}
-        onChangeText={(text) => setName(text)}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-        secureTextEntry
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={(text) => setConfirmPassword(text)}
-        secureTextEntry
-        style={styles.input}
-      />
-      {/* Adding a message indicating if the username is available or not */}
-      {username.trim() !== "" && (
-        <Text style={{ color: isUsernameAvailable ? 'green' : 'red' }}>
-          {isUsernameAvailable ? 'Username is available' : 'Username is taken'}
+    <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    style={styles.container}>
+      
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        {/* Displaying the message */}
+        <Text style={{ fontSize: 25, marginBottom: 20 }}>
+          Sign up to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
         </Text>
-      )}
-      <Pressable
-        onPress={handleRegister}
-        style={{
-          height: 40,
-          borderRadius: 10,
-          backgroundColor: 'blue',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: 250,
-          marginBottom: 10,
-        }}>
-        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', }}>Register</Text>
-      </Pressable>
-    </View>
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Username"
+          value={username}
+          onChangeText={(text) => setUsername(text)}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          secureTextEntry
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={(text) => setConfirmPassword(text)}
+          secureTextEntry
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Phone Number"
+          value={phoneNumber}
+          onChangeText={(text) => setPhoneNumber(text)}
+          keyboardType="phone-pad"
+          style={styles.input}
+        />
+
+        {/* Adding a message indicating if the username is available or not */}
+        {username.trim() !== "" && (
+          <Text style={{ color: isUsernameAvailable ? 'green' : 'red' }}>
+            {isUsernameAvailable ? 'Username is available' : 'Username is taken'}
+          </Text>
+        )}
+        <Pressable
+          onPress={handleRegister}
+          style={{
+            height: 40,
+            borderRadius: 10,
+            backgroundColor: 'blue',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: 250,
+            marginBottom: 10,
+          }}>
+          <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', }}>Register</Text>
+        </Pressable>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -12,7 +12,8 @@ import { setDoc, doc, getDoc } from "firebase/firestore";
 const AddPost = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [mainCategory, setMainCategory] = useState('');
+  const [subCategory, setSubCategory] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState(null);
@@ -23,6 +24,23 @@ const AddPost = () => {
     setShowDatePicker(Platform.OS === 'andriod');
     setDate(currentDate);
   };
+
+  const [categories, setCategories] = useState({
+    '': ['Select Subcategory'],
+    'Life Struggle': ['Challenges', 'Overcoming Obstacles', 'Personal Growth'],
+    'Depression': ['Understanding Depression', 'Coping Strategies', 'Seeking Help'],
+    'Motivation': ['Inspirational Quotes', 'Success Stories', 'Goal Setting'],
+    'Relationships': ['Dating', 'Communication', 'Marriage'],
+    'Success Stories': ['Career Achievements', 'Personal Accomplishments', 'Milestones'],
+    'Mental Health': ['Anxiety', 'Stress Management', 'Self-Care'],
+    'Anxiety': ['Causes of Anxiety', 'Coping Mechanisms', 'Anxiety Disorders'],
+    'Personal Growth': ['Self-Improvement', 'Learning', 'Skill Development'],
+  });
+
+  useEffect(() => {
+    // Reset subcategory when the main category changes
+    setSubCategory('');
+  }, [mainCategory]);
 
 
   const pickImage = async () => {
@@ -80,7 +98,7 @@ const AddPost = () => {
           await setDoc(docRef, {
             title,
             description,
-            category,
+            category: `${mainCategory} - ${subCategory}`,
             date,
             image: imageUrl,
             userName: userDoc.data().username, // Include user's username in the post
@@ -90,7 +108,7 @@ const AddPost = () => {
           await setDoc(docRef, {
             title,
             description,
-            category,
+            category: `${mainCategory} - ${subCategory}`,
             date,
             image: imageUrl,
 
@@ -102,7 +120,7 @@ const AddPost = () => {
         await setDoc(docRef, {
           title,
           description,
-          category,
+          category: `${mainCategory} - ${subCategory}`,
           date,
           userName: 'Unknown', // Default value if image is not uploaded
         });
@@ -111,7 +129,8 @@ const AddPost = () => {
       // Resetting form fields
       setTitle('');
       setDescription('');
-      setCategory('');
+      setMainCategory('');
+      setSubCategory('');
       setDate(new Date());
       setImage(null);
     } catch (error) {
@@ -125,75 +144,88 @@ const AddPost = () => {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -150}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? -50 : 0}
     >
-    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-      <Text style={styles.heading}>Add Your Post</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        onChangeText={(text) => setTitle(text)}
-        value={title}
-        keyboardShouldPersistTaps="handled"
-      />
-      <TextInput
-        style={styles.desInput}
-        placeholder="Description"
-        onChangeText={(text) => setDescription(text)}
-        value={description}
-        multiline
-      />
-      <Text style={styles.label}>Category:</Text>
-      <Picker
-        style={styles.input}
-        selectedValue={category}
-        onValueChange={(itemValue) => setCategory(itemValue)}
-      >
-        <Picker.Item label="Select Category" value="" />
-        <Picker.Item label="Life Struggle" value="Life Struggle" />
-        <Picker.Item label="Depression" value="Depression" />
-        <Picker.Item label="Motivation" value="Motivation" />
-        <Picker.Item label="Relationships" value="Relationships" />
-        <Picker.Item label="Success Stories" value="Success Stories" />
-        <Picker.Item label="Mental Health" value="Mental Health" />
-        <Picker.Item label="Anxiety" value="Anxiety" />
-        <Picker.Item label="Personal Growth" value="Personal Growth" />
-      </Picker>
-      <Text style={styles.label}>Date:</Text>
-      {Platform.OS === 'ios' ? (
-        <Button
-          title="Select Date"
-          onPress={() => setShowDatePicker(true)}
-        />
-      ) : (
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.heading}>Add Your Post</Text>
         <TextInput
           style={styles.input}
-          placeholder="Date"
-          onFocus={() => setShowDatePicker(true)}
-          value={date.toDateString()}
+          placeholder="Title"
+          onChangeText={(text) => setTitle(text)}
+          value={title}
+          keyboardShouldPersistTaps="handled"
         />
-      )}
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          is24Hour={true}
-          display="default"
-          onChange={handleDateChange}
+        <TextInput
+          style={styles.desInput}
+          placeholder="Description"
+          onChangeText={(text) => setDescription(text)}
+          value={description}
+          multiline
+          keyboardShouldPersistTaps="handled"
         />
-      )}
+        <Text style={styles.label}>Category:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            style={styles.input}
+            selectedValue={mainCategory}
+            onValueChange={(itemValue) => setMainCategory(itemValue)}
+            keyboardShouldPersistTaps="handled"
+          >
+            {Object.keys(categories).map((mainCat) => (
+              <Picker.Item key={mainCat} label={mainCat} value={mainCat} />
+            ))}
+          </Picker>
+          {mainCategory !== '' && (
+            <Picker
+              style={styles.input}
+              selectedValue={subCategory}
+              onValueChange={(itemValue) => setSubCategory(itemValue)}
+              enabled={mainCategory !== ''}
+              keyboardShouldPersistTaps="handled"
+            >
+              {categories[mainCategory].map((subCat) => (
+                <Picker.Item key={subCat} label={subCat} value={subCat} />
+              ))}
+            </Picker>
+          )}
+        </View>
 
-      {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
-     <TouchableOpacity style={styles.button} onPress={pickImage}><Text style={styles.buttonText}>Select Image</Text></TouchableOpacity>
+        <Text style={styles.label}>Date:</Text>
+        {Platform.OS === 'ios' ? (
+          <Button
+            title="Select Date"
+            onPress={() => setShowDatePicker(true)}
+          />
+        ) : (
+          <TextInput
+            style={styles.input}
+            placeholder="Date"
+            onFocus={() => setShowDatePicker(true)}
+            value={date.toDateString()}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            is24Hour={true}
+            display="default"
+            onChange={handleDateChange}
+          />
+        )}
+
+        {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
+        <TouchableOpacity style={styles.button} onPress={pickImage}><Text style={styles.buttonText}>Select Image</Text></TouchableOpacity>
 
 
-      {!uploading ? <Button style={styles.button} title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
-      <TouchableOpacity style={styles.button} onPress={handlePost}>
-        <Text style={styles.buttonText}>Post</Text>
-      </TouchableOpacity>
+        {!uploading ? <Button style={styles.button} title='Upload Image' onPress={uploadImage} /> : <ActivityIndicator size={'small'} color='black' />}
+        <TouchableOpacity style={styles.button} onPress={handlePost}>
+          <Text style={styles.buttonText}>Post</Text>
+        </TouchableOpacity>
 
-    </ScrollView>
-      </KeyboardAvoidingView >
+      </ScrollView>
+    </KeyboardAvoidingView >
   );
 };
 
@@ -210,7 +242,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     marginBottom: 20,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
   },
   input: {
     height: 40,
@@ -221,10 +253,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     width: '100%',
-    backgroundColor: '#f5f5f5', 
+    backgroundColor: '#f5f5f5',
   },
-  desInput:{
-    height: 'auto',  
+  pickerContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 20,
+},
+
+  desInput: {
+    height: 'auto',
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 20,
@@ -236,14 +275,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
   },
   image: {
-    width: '100%', 
+    width: '100%',
     height: 200,
     resizeMode: 'cover',
     marginBottom: 20,
-    borderRadius: 8, 
+    borderRadius: 8,
   },
   button: {
     marginBottom: 20,
@@ -255,9 +294,9 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   buttonText: {
-    color: '#fff', 
+    color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
   },
 });
 
