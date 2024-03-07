@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform ,  Keyboard} from 'react-native';
+import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform ,  Keyboard, ScrollView} from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import {auth} from '../config/firebaseConfig'
@@ -33,11 +33,6 @@ const LoginPage = () => {
   };
   
      return (
-      <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -160}
-    >
     <View style={styles.container}>
        <Text style={{ fontSize: 25, marginBottom: 20 }}>
         Login to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
@@ -70,7 +65,8 @@ const LoginPage = () => {
         </Pressable>
       </Link>
     </View>
-    </KeyboardAvoidingView>
+
+
   );
 };
 
@@ -79,6 +75,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    //padding: 20
   },
   input: {
     height: 40,

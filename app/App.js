@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRoutes } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
+//import WeatherScreen from './(component)/weather';
 
 
 //creating the AuthenticatedUserContext
@@ -49,6 +50,7 @@ const App = () => {
     { path: '/addpost', component: AddPostScreen, isPublic: user },
     { path: '/rating', component: RatingComponent, isPublic: user },
     { path: '/comment', component: CommentScreen, isPublic: user },
+    { path: '/weather', component: WeatherScreen, isPublic: user },
    
 
 

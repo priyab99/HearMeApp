@@ -85,7 +85,15 @@ const Profile = () => {
           <MapView style={styles.map} region={mapRegion}>
             <Marker coordinate={mapRegion} title="My Location" />
           </MapView>
+          <TouchableOpacity onPress={()=>router.push('/weather')}>
+                
+          
+            <Text style={styles.text}
+            ><Ionicons name="cloud-outline" size={20} color="gray" />Weather</Text>
+               </TouchableOpacity>
+
         </>
+        
       ) : (
         <Text style={styles.loadingText}>Loading user information...</Text>
       )}

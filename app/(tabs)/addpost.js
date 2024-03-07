@@ -21,9 +21,15 @@ const AddPost = () => {
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
-    setShowDatePicker(Platform.OS === 'andriod');
     setDate(currentDate);
+    
+    // For Android, manually hide the DateTimePicker after date selection
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
   };
+  
+  
 
   const [categories, setCategories] = useState({
     '': ['Select Subcategory'],

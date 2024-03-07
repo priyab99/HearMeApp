@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, StyleSheet,  Keyboard } from "react-native";
+import { Text, View, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, StyleSheet,  Keyboard, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
@@ -107,7 +107,9 @@ const RegisterPage = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      padding: 20, 
     },
+    
     input: {
       height: 40,
       borderRadius: 10,
@@ -122,9 +124,12 @@ const RegisterPage = () => {
   return (
     <KeyboardAvoidingView
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} 
     style={styles.container}>
-      
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ScrollView contentContainerStyle={styles.container}>
+  {/* ... rest of your code */}
+
+
         {/* Displaying the message */}
         <Text style={{ fontSize: 25, marginBottom: 20 }}>
           Sign up to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
@@ -188,7 +193,8 @@ const RegisterPage = () => {
           }}>
           <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', }}>Register</Text>
         </Pressable>
-      </View>
+        </ScrollView>
+      
     </KeyboardAvoidingView>
   );
 };
