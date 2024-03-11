@@ -6,7 +6,7 @@ const WeatherScreen = () => {
   const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState(null);
 
-  // Fetch weather data function
+  // Fetching weather data function
   const fetchWeatherData = async () => {
     const apiKey = process.env.EXPO_OPEN_WEATHER_API_KEY;
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
@@ -16,15 +16,15 @@ const WeatherScreen = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Update the weather data state
+        // Updating the weather data state
         setWeatherData(data);
       } else {
-        // Handle error response
+        // Handling error response
         const errorMessage = data.message || 'City not found';
         Alert.alert('Error', errorMessage);
       }
     } catch (error) {
-      // Handle network or other unexpected errors
+      // Handling network or other unexpected errors
       console.error('Error fetching weather data:', error.message);
     }
   };

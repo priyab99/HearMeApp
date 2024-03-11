@@ -80,7 +80,7 @@ const CommentScreen = () => {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <TextInput
           style={{ flex: 1, borderWidth: 1, borderColor: 'gray', padding: 8, marginRight: 8, marginTop: 10 , marginLeft: 5}}
-          placeholder="Add a comment..."
+          placeholder="Give some guidelines..."
           value={newComment}
           onChangeText={(text) => setNewComment(text)}
         />
@@ -95,6 +95,7 @@ const CommentScreen = () => {
           <View style={{ padding: 8, borderBottomWidth: 1, borderBottomColor: 'gray' }}>
             <Text>{item.content}</Text>
             <Text>By: {item?.name || 'Anonymous'} </Text>
+            <Text>{item.createdAt.toDate().toLocaleString()}</Text>
           </View>
         )}
       />
