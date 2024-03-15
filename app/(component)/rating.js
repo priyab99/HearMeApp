@@ -37,7 +37,7 @@ const RatingComponent = ({ postId, onSubmitRating }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Rate this Post:</Text>
+      <Text style={styles.text}>Rate this Post</Text>
       <View style={styles.rating}>
         {Array(5)
           .fill(0)

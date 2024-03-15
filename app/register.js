@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, StyleSheet,  Keyboard, ScrollView } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { Text, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { doc, setDoc, getDocs, collection } from "firebase/firestore";
+import { gsap } from 'gsap-rn';
+import { Back } from 'gsap';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -13,8 +15,19 @@ const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState('');
-
+  const titleRef = useRef(null);
   const router = useRouter();
+
+
+
+  useEffect(() => {
+    gsap.from(titleRef.current, {
+      duration: 1,
+      delay: 0.2,
+      transform: { rotate: 360, scale: 0.5 },
+      ease: Back.easeInOut
+    });
+  }, [])
 
   useEffect(() => {
     const checkUsernameAvailability = async () => {
@@ -43,7 +56,7 @@ const RegisterPage = () => {
     if (phoneNumber.trim() === '') {
       return true; // Optional: Phone number is not required
     }
-    
+
     const phoneNumberRegex = /^\d{11}$/; // a valid phone number has 11 digits
     return phoneNumberRegex.test(phoneNumber);
   };
@@ -51,7 +64,7 @@ const RegisterPage = () => {
   const handleRegister = async () => {
     try {
       // Basic form validation
-      if (!email || !password || !name || !username || !isValidPhoneNumber()) {
+      if (!email || !password || !name || !username || !phoneNumber) {
         Alert.alert("Please fill in all fields");
         return;
       }
@@ -67,6 +80,14 @@ const RegisterPage = () => {
         Alert.alert("Username is already taken. Please choose another.");
         return;
       }
+
+      //checking if the phone number has 11 digits
+      if (!isValidPhoneNumber()) {
+        Alert.alert("Phone number has to be of 11 digits");
+        return;
+      }
+
+
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -101,37 +122,20 @@ const RegisterPage = () => {
   };
 
 
-
-  const styles =StyleSheet.create( {
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20, 
-    },
-    
-    input: {
-      height: 40,
-      borderRadius: 10,
-      borderColor: 'gray',
-      borderWidth: 1,
-      marginBottom: 10,
-      paddingHorizontal: 10,
-      width: 250,
-    }
-  });
-  
   return (
     <KeyboardAvoidingView
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100} 
-    style={styles.container}>
-      <ScrollView contentContainerStyle={styles.container}>
-  {/* ... rest of your code */}
-
-
-        {/* Displaying the message */}
-        <Text style={{ fontSize: 25, marginBottom: 20 }}>
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      {/* Adding a message indicating if the username is available or not */}
+      <Text
+        style={{ color: isUsernameAvailable ? 'green' : 'red', textAlign: 'center', marginBottom: 10 }}>
+        {username.trim() !== "" && (
+          isUsernameAvailable ? 'Username is available' : 'Username is taken'
+        )}
+      </Text>
+      <ScrollView contentContainerStyle={styles.scollCotainer}>
+        <Text ref={titleRef} style={{ fontSize: 25, marginBottom: 20, textAlign: "center" }}>
           Sign up to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
         </Text>
         <TextInput
@@ -173,30 +177,56 @@ const RegisterPage = () => {
           keyboardType="phone-pad"
           style={styles.input}
         />
-
-        {/* Adding a message indicating if the username is available or not */}
-        {username.trim() !== "" && (
-          <Text style={{ color: isUsernameAvailable ? 'green' : 'red' }}>
-            {isUsernameAvailable ? 'Username is available' : 'Username is taken'}
-          </Text>
-        )}
         <Pressable
           onPress={handleRegister}
-          style={{
-            height: 40,
-            borderRadius: 10,
-            backgroundColor: 'blue',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: 250,
-            marginBottom: 10,
-          }}>
-          <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', }}>Register</Text>
+          style={styles.registerButton}>
+          <Text style={styles.registerText}>Register</Text>
         </Pressable>
-        </ScrollView>
-      
+      </ScrollView>
+
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+    marginTop: 50
+  },
+
+  scollCotainer: {
+
+
+    padding: 20,
+    paddingTop: 40,
+    paddingBottom: 50,
+    backgroundColor: '#fff',
+  },
+
+  input: {
+    height: 40,
+    borderRadius: 10,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    width: 250,
+  },
+  registerButton: {
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'blue',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 250,
+    marginBottom: 10,
+  },
+  registerText: {
+    color: 'white', fontSize: 20, fontWeight: 'bold',
+  }
+});
 
 export default RegisterPage;

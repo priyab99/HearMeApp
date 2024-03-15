@@ -162,12 +162,15 @@ const HomeScreen = () => {
             {/* Like and Dislike Buttons and Counts */}
             <View style={styles.actions}>
               <TouchableOpacity onPress={() => handleLike(post.id)}>
-                <Ionicons name="thumbs-up" size={24} color="blue" />
-                <Text> {post.likes}</Text>
+                {/*  <Ionicons name="thumbs-up" size={24} color="blue" /> */}
+               
+                <Text style={styles.text}>Like {post.likes}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDislike(post.id)}>
-                <Ionicons name="thumbs-down" size={24} color="red" />
-                <Text> {post.dislikes}</Text>
+                 {/* <Ionicons name="thumbs-down" size={24} color="red" /> */}
+                 
+               
+                <Text style={styles.text}> Dislike {post.dislikes}</Text>
               </TouchableOpacity>
             </View>
 
@@ -177,7 +180,7 @@ const HomeScreen = () => {
             <View style={styles.actions}>
               <TouchableOpacity onPress={()=>router.push({ pathname: '/comment', params: { postId: post.id } })}>
                 
-                 <Text>Comment</Text>
+                 <Text style={styles.text}>Comment</Text>
                 </TouchableOpacity>
 
 
@@ -223,6 +226,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
+  text:{
+    fontSize: 16,
+
+  },
   image: {
     width: '100%',
     height: 200,
@@ -240,7 +247,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   seeMoreButtonText: {
     color: '#fff', 

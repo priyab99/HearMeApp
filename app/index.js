@@ -1,14 +1,33 @@
-import React, { useState } from 'react';
-import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform ,  Keyboard, ScrollView} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform , ScrollView} from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import {auth} from '../config/firebaseConfig'
 import { Alert } from 'react-native';
+import { gsap } from 'gsap-rn';
+import { Back } from 'gsap';
+
+
+
+
+
 
 const LoginPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const titleRef = useRef(null);
+
+
+  useEffect(()=>{
+    gsap.from(titleRef.current, {
+  
+      duration: 1,
+      delay: 0.2,
+      transform:{rotate:360, scale:0.5},
+      ease: Back.easeInOut
+    });
+  },[])
 
   const handleLogin = () => {
     // Handling login logic here
@@ -32,9 +51,16 @@ const LoginPage = () => {
     }
   };
   
+  
+  
      return (
+      <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+         <ScrollView contentContainerStyle={styles.scrollContainer}>
     <View style={styles.container}>
-       <Text style={{ fontSize: 25, marginBottom: 20 }}>
+       <Text ref={titleRef}   style={{ fontSize: 25, marginBottom: 20 }}>
         Login to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
       </Text>
       <TextInput
@@ -65,6 +91,8 @@ const LoginPage = () => {
         </Pressable>
       </Link>
     </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
 
 
   );
@@ -75,7 +103,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    //padding: 20
+    padding: 30,
+    marginTop: 80
+  },
+  scollCotainer: {
+
+
+    padding: 20,
+    paddingTop: 40,
+    paddingBottom: 50,
+    backgroundColor: '#fff',
   },
   input: {
     height: 40,

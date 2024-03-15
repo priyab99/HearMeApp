@@ -17,7 +17,7 @@ const About = () => {
       y: -20,
       duration: 1,
       delay: 0.2,
-      transform:{rotate:80, scale:0.5},
+      transform:{rotate:360, scale:0.5},
       ease: Back.easeInOut
     });
 
@@ -27,7 +27,7 @@ const About = () => {
       y: -20,
       duration: 1,
       delay: 0.4,
-      transform:{rotate:80, scale:0.5},
+      transform:{rotate:360, scale:0.5},
     });
 
     // Animation for the description text
@@ -36,14 +36,7 @@ const About = () => {
       y: -20,
       duration: 1,
       delay: 0.6,
-      transform:{rotate:60, scale:0.5},
-    });
-
-    // Animation for the video container
-    gsap.from(videoRef.current, {
-      opacity: 0,
-      duration: 1,
-      delay: 0.8,
+      transform:{rotate:360, scale:0.5},
     });
   }, []);
 
@@ -64,7 +57,6 @@ const About = () => {
         </Text>
         <Text style={styles.subtitle}>Watch Our Intro Video</Text>
         <WebView
-          ref={videoRef}
           style={styles.videoContainer}
           javaScriptEnabled={true}
           source={{ uri: 'https://www.youtube.com/watch?v=yg8lwoGx_mM' }}

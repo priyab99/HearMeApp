@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, View } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import   DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { firebase, database, auth } from "../../config/firebaseConfig"
 import { setDoc, doc, getDoc } from "firebase/firestore";
+import { gsap } from 'gsap-rn';
+import { Back } from 'gsap';
+import { useRouter } from 'expo-router';
 
 
 
@@ -18,6 +21,19 @@ const AddPost = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const titleRef = useRef(null);
+
+  const router=useRouter();
+
+
+  useEffect(() => {
+    gsap.from(titleRef.current, {
+      duration: 1,
+      delay: 0.2,
+      transform: { rotate: 360, scale: 0.5 },
+      ease: Back.easeInOut
+    });
+  }, [])
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -139,6 +155,9 @@ const AddPost = () => {
       setSubCategory('');
       setDate(new Date());
       setImage(null);
+      
+      router.push('/posts');
+
     } catch (error) {
       console.error('Error adding post:', error);
     } finally {
@@ -153,7 +172,7 @@ const AddPost = () => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? -50 : 0}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.heading}>Add Your Post</Text>
+        <Text ref={titleRef} style={styles.heading}>Add Your Post</Text>
         <TextInput
           style={styles.input}
           placeholder="Title"
@@ -195,6 +214,7 @@ const AddPost = () => {
             </Picker>
           )}
         </View>
+
 
         <Text style={styles.label}>Date:</Text>
         {Platform.OS === 'ios' ? (
