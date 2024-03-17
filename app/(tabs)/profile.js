@@ -6,6 +6,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { auth, database } from '../../config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
   const router = useRouter();
@@ -63,6 +64,17 @@ const Profile = () => {
     userLocation();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      // Clear userId from AsyncStorage
+      await AsyncStorage.removeItem('userId');
+      // Redirect to login screen
+      router.push('/');
+    } catch (error) {
+      console.error('Error logging out:', error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {user ? (
@@ -80,24 +92,25 @@ const Profile = () => {
             <Text style={styles.text}>
               <Ionicons name="at-outline" size={20} color="gray" /> Uername: {user.username}
             </Text>
+            <TouchableOpacity onPress={()=>router.push('/weather')}>
+                
+          
+                <Text style={styles.text}
+                ><Ionicons name="cloud-outline" size={20} color="gray" />Weather</Text>
+                   </TouchableOpacity>
             {locationError && <Text style={styles.error}>{locationError}</Text>}
           </View>
           <MapView style={styles.map} region={mapRegion}>
             <Marker coordinate={mapRegion} title="My Location" />
           </MapView>
-          <TouchableOpacity onPress={()=>router.push('/weather')}>
-                
-          
-            <Text style={styles.text}
-            ><Ionicons name="cloud-outline" size={20} color="gray" />Weather</Text>
-               </TouchableOpacity>
+         
 
         </>
         
       ) : (
         <Text style={styles.loadingText}>Loading user information...</Text>
       )}
-      <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/')}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
     </View>

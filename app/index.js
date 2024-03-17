@@ -1,47 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform , ScrollView} from 'react-native';
+import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../config/firebaseConfig'
+import { auth } from '../config/firebaseConfig'
 import { Alert } from 'react-native';
-import { gsap } from 'gsap-rn';
-import { Back } from 'gsap';
-
-
-
-
+import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const LoginPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const titleRef = useRef(null);
 
 
-  useEffect(()=>{
-    gsap.from(titleRef.current, {
-  
-      duration: 1,
-      delay: 0.2,
-      transform:{rotate:360, scale:0.5},
-      ease: Back.easeInOut
-    });
-  },[])
 
   const handleLogin = () => {
-    // Handling login logic here
     if (email !== "" && password !== "") {
       signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           const user = userCredential.user;
-  
-          // Checking if the user's email is verified
+
           if (user.emailVerified) {
+            // Saving user ID in AsyncStorage upon successful login
+            await AsyncStorage.setItem('userId', user.uid);
             console.log("Login success");
-            router.replace('/posts'); // Navigating to the Home Screen after successful login
+            router.replace('/posts');
           } else {
-            // If email is not verified, showing an alert or perform some action
             Alert.alert("Email not verified", "Please verify your email before logging in.");
           }
         })
@@ -50,49 +35,73 @@ const LoginPage = () => {
         });
     }
   };
-  
-  
-  
-     return (
-      <KeyboardAvoidingView
+
+  // Checking AsyncStorage for user ID on app start
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (userId) {
+          router.replace('/posts'); // Navigating to next screen if user ID exists
+        }
+      } catch (error) {
+        // Handling AsyncStorage errors
+        //console.error('Error fetching data from AsyncStorage:', error);
+
+        Alert.alert('Error', 'An error occurred while fetching data. Please try again later.');
+      }
+    };
+    checkLoginStatus();
+  }, []); // Empty dependency array ensures this effect runs only once on component mount
+
+
+
+
+  return (
+    <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-         <ScrollView contentContainerStyle={styles.scrollContainer}>
-    <View style={styles.container}>
-       <Text ref={titleRef}   style={{ fontSize: 25, marginBottom: 20 }}>
-        Login to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
-      </Text>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-        secureTextEntry
-        style={styles.input}
-      />
 
-      <Pressable
-        onPress={handleLogin}
-        style={styles.loginButton}
-      >
-        <Text style={styles.loginButtonText}>Login</Text>
-      </Pressable>
-      <Text style={styles.firstTimeText}>First time on <Text style={{ fontWeight: 'bold', fontStyle: 'italic' }}>HearMe?</Text></Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-      <Link href="/register" asChild>
-        <Pressable>
-          <Text style={styles.createAccountText}>Create Account</Text>
-        </Pressable>
-      </Link>
-    </View>
-    </ScrollView>
+        <View style={styles.container}>
+          <Ionicons name="heart-half-outline" size={60} color="navy"></Ionicons>
+          <Text style={{ fontSize: 25, marginBottom: 30 }}>
+            Login to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
+          </Text>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+            secureTextEntry
+            style={styles.input}
+          />
+
+          <Pressable
+            onPress={handleLogin}
+            style={styles.loginButton}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </Pressable>
+          <Text style={styles.firstTimeText}>First time on <Text style={{ fontWeight: 'bold', fontStyle: 'italic', color: 'purple' }}>HearMe?</Text></Text>
+
+          <Link href="/register" asChild>
+            <Pressable>
+              <Text style={styles.createAccountText}>Create Account</Text>
+            </Pressable>
+          </Link>
+        </View>
+      </ScrollView>
+
     </KeyboardAvoidingView>
+
 
 
   );
@@ -103,16 +112,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
+    padding: 20,
     marginTop: 80
   },
-  scollCotainer: {
+  scrollContainer: {
 
 
     padding: 20,
     paddingTop: 40,
-    paddingBottom: 50,
-    backgroundColor: '#fff',
+    paddingBottom: 20,
+    //backgroundColor: '#fff',
   },
   input: {
     height: 40,
@@ -126,7 +135,7 @@ const styles = StyleSheet.create({
   loginButton: {
     height: 40,
     borderRadius: 10,
-    backgroundColor: 'blue',
+    backgroundColor: 'navy',
     justifyContent: 'center',
     alignItems: 'center',
     width: 250,
@@ -146,7 +155,7 @@ const styles = StyleSheet.create({
 
   },
   createAccountText: {
-    color: 'blue',
+    color: 'navy',
     fontSize: 18,
   },
 });

@@ -1,66 +1,42 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import WebView from 'react-native-webview';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { gsap } from 'gsap-rn';
 import { Back } from 'gsap';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const About = () => {
-  const titleRef = useRef(null);
-  const missionRef = useRef(null);
-  const descriptionRef = useRef(null);
-  const videoRef = useRef(null);
+  const imageRef = useRef(null);
+  const router=useRouter();
+  
 
   useEffect(() => {
     // Animation for the title
-    gsap.from(titleRef.current, {
-      opacity: 0,
-      y: -20,
+    gsap.from(imageRef.current, {
+      
       duration: 1,
       delay: 0.2,
       transform:{rotate:360, scale:0.5},
       ease: Back.easeInOut
-    });
-
-    // Animation for the mission subtitle
-    gsap.from(missionRef.current, {
-      opacity: 0,
-      y: -20,
-      duration: 1,
-      delay: 0.4,
-      transform:{rotate:360, scale:0.5},
-    });
-
-    // Animation for the description text
-    gsap.from(descriptionRef.current, {
-      opacity: 0,
-      y: -20,
-      duration: 1,
-      delay: 0.6,
-      transform:{rotate:360, scale:0.5},
     });
   }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text ref={titleRef} style={styles.title}>About <Text style={{ fontStyle: 'italic', color: 'purple' }}>HearMe</Text></Text>
+        <Text style={styles.title}>About <Text style={{ fontStyle: 'italic', color: 'purple' }}>HearMe</Text></Text>
          <Text style={styles.description}>
           Welcome to HearMe, a platform where individuals can share their day-to-day experiences and life struggles, providing a space for self-expression and support.
         </Text>
-        <Text ref={missionRef} style={styles.subtitle}>Our Mission</Text>
-        <Text ref={descriptionRef} style={styles.description}>
-           Our mission is to create a community where people feel heard and supported.
-        </Text>
-        <Text ref={descriptionRef} style={styles.subtitle}>How It Works</Text>
-        <Text style={styles.description}>
-          Share your thoughts, struggles, or inspirational moments through posts. Connect with others by engaging in conversations and providing support.
-        </Text>
-        <Text style={styles.subtitle}>Watch Our Intro Video</Text>
-        <WebView
-          style={styles.videoContainer}
-          javaScriptEnabled={true}
-          source={{ uri: 'https://www.youtube.com/watch?v=yg8lwoGx_mM' }}
-        />
+        <Image ref={imageRef} style={styles.image} source={{uri: 'https://img.freepik.com/free-vector/heart-puzzle-black-red_78370-4006.jpg?t=st=1710657631~exp=1710661231~hmac=61dd3c8a4d75f03427c4aaf5dc639feb54e3d4d0fdfe6951f90d0a667bab4b02&w=740'}}></Image>
+      
+        <TouchableOpacity onPress={()=>router.push('/video')}>
+          <Text style={styles.subtitle}>
+            <Ionicons name="logo-youtube" size={20} color="red" />
+            {' '}Watch Our Intro Video
+          </Text>
+        </TouchableOpacity>
+       
       </View>
     </ScrollView>
   );
@@ -92,11 +68,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-  videoContainer: {
-    height: 200,
-    width: 280,
-    marginTop: 15,
-  },
+ 
+  image:{
+    width: 220,
+    height:200
+  }
 });
 
 export default About;

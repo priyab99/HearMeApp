@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, TextInput, Button, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 
 const WeatherScreen = () => {
   const [city, setCity] = useState('');
@@ -30,6 +30,11 @@ const WeatherScreen = () => {
   };
 
   return (
+    <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    style={styles.container}
+  >
+    <ScrollView  contentContainerStyle={styles.scrollContainer}>
     <View style={styles.container}>
          <Stack.Screen options={{ headerTitle: `Weather` }} />
       <TextInput
@@ -39,7 +44,11 @@ const WeatherScreen = () => {
         onChangeText={(text) => setCity(text)}
       />
       {weatherData ? null : (
-        <Button title="Get Weather" onPress={fetchWeatherData} />
+        <TouchableOpacity style={styles.weatherButton} onPress={fetchWeatherData}>
+           <Text style={styles.weatherText}>Weather</Text>
+          
+        </TouchableOpacity>
+       
       )}
 
       {weatherData ? (
@@ -60,6 +69,9 @@ const WeatherScreen = () => {
         <Text>Enter a city and click "Get Weather"</Text>
       )}
     </View>
+    </ScrollView>
+    
+    </KeyboardAvoidingView>
   );
 };
 
@@ -68,6 +80,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+    marginTop: 50
+  },
+  scrollContainer: {
+
+
+    padding: 20,
+    paddingTop: 40,
+    paddingBottom: 20,
+    //backgroundColor: '#fff',
   },
   input: {
     textAlign: 'center',
@@ -92,6 +114,22 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
+  weatherButton:{
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'navy',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 250,
+    marginBottom: 10,
+    fontSize: 10
+  },
+  weatherText:{
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  }
+  
 });
 
 export default WeatherScreen;

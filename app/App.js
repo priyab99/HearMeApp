@@ -51,6 +51,8 @@ const App = () => {
     { path: '/rating', component: RatingComponent, isPublic: user },
     { path: '/comment', component: CommentScreen, isPublic: user },
     { path: '/weather', component: WeatherScreen, isPublic: user },
+    { path: '/video', component: VideoScreen, isPublic: user },
+
    
 
 

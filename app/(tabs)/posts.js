@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, updateDoc, doc, setDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, updateDoc, doc, setDoc, onSnapshot, orderBy, query,getDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
 import RatingComponent from '../(component)/rating';
@@ -12,7 +12,6 @@ const HomeScreen = () => {
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [disabledPosts, setDisabledPosts] = useState([]);
   const [visiblePosts, setVisiblePosts] = useState([]); 
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const router=useRouter();
@@ -49,68 +48,65 @@ const HomeScreen = () => {
 
   const handleLike = async (postId) => {
     try {
-      if (!disabledPosts.find((item) => item.postId === postId && item.action === 'like')) {
-        // Incrementing the likes
-        const updatedLikes = posts.find((post) => post.id === postId)?.likes + 1 || 1;
-
-        // Updating Firebase document
-        await updateDoc(doc(database, 'posts', postId), {
-          likes: updatedLikes,
+      const userId = auth.currentUser.uid;
+      const postRef = doc(database, 'posts', postId);
+      
+      const postSnapshot = await getDoc(postRef);
+      if (!postSnapshot.exists()) {
+        console.error('Post not found');
+        return;
+      }
+  
+      const postData = postSnapshot.data();
+      const likedByUser = postData.likesBy ? postData.likesBy.includes(userId) : false;
+  
+      if (likedByUser) {
+        await updateDoc(postRef, {
+          likes: postData.likes - 1,
+          likesBy: postData.likesBy.filter(id => id !== userId),
         });
-
-        // Updating state
-        setPosts((prevPosts) => {
-          const updatedPosts = prevPosts.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  likes: updatedLikes,
-                }
-              : post
-          );
-          return updatedPosts;
+      } else {
+        await updateDoc(postRef, {
+          likes: postData.likes + 1,
+          likesBy: [...(postData.likesBy || []), userId],
         });
-        
-
-        // Adding postId to disabledPosts with action 'like'
-        setDisabledPosts((prevDisabledPosts) => [...prevDisabledPosts, { postId, action: 'like' }]);
-
       }
     } catch (error) {
       console.error('Error updating likes:', error.message);
     }
   };
-
+  
   const handleDislike = async (postId) => {
     try {
-      if (!disabledPosts.find((item) => item.postId === postId && item.action === 'dislike')) {
-        // Incrementing the dislikes
-        const updatedDislikes = posts.find((post) => post.id === postId)?.dislikes + 1 || 1;
-
-        // Updating Firebase document
-        await updateDoc(doc(database, 'posts', postId), {
-          dislikes: updatedDislikes,
+      const userId = auth.currentUser.uid;
+      const postRef = doc(database, 'posts', postId);
+  
+      const postSnapshot = await getDoc(postRef);
+      if (!postSnapshot.exists()) {
+        console.error('Post not found');
+        return;
+      }
+  
+      const postData = postSnapshot.data();
+      const dislikedByUser = postData.dislikesBy ? postData.dislikesBy.includes(userId) : false;
+  
+      if (dislikedByUser) {
+        await updateDoc(postRef, {
+          dislikes: postData.dislikes - 1,
+          dislikesBy: postData.dislikesBy.filter(id => id !== userId),
         });
-
-        // Updating state
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId
-              ? {
-                ...post,
-                dislikes: updatedDislikes,
-              }
-              : post
-          )
-        );
-
-        // Adding postId to disabledPosts with action 'dislike'
-        setDisabledPosts((prevDisabledPosts) => [...prevDisabledPosts, { postId, action: 'dislike' }]);
+      } else {
+        await updateDoc(postRef, {
+          dislikes: postData.dislikes + 1,
+          dislikesBy: [...(postData.dislikesBy || []), userId],
+        });
       }
     } catch (error) {
       console.error('Error updating dislikes:', error.message);
     }
   };
+  
+  
 
 
 
@@ -162,15 +158,15 @@ const HomeScreen = () => {
             {/* Like and Dislike Buttons and Counts */}
             <View style={styles.actions}>
               <TouchableOpacity onPress={() => handleLike(post.id)}>
-                {/*  <Ionicons name="thumbs-up" size={24} color="blue" /> */}
+            
                
-                <Text style={styles.text}>Like {post.likes}</Text>
+                <Text style={styles.text}> <Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDislike(post.id)}>
-                 {/* <Ionicons name="thumbs-down" size={24} color="red" /> */}
+                
                  
                
-                <Text style={styles.text}> Dislike {post.dislikes}</Text>
+                <Text style={styles.text}><Ionicons name="thumbs-down" size={17} color="gray" /> Dislike {post.dislikes}</Text>
               </TouchableOpacity>
             </View>
 
@@ -243,11 +239,12 @@ const styles = StyleSheet.create({
   },
   seeMoreButton: {
     padding: 10,
-    backgroundColor: '#3498db', 
+    backgroundColor: 'navy', 
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 15,
+    
   },
   seeMoreButtonText: {
     color: '#fff', 

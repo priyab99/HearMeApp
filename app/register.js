@@ -4,8 +4,6 @@ import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { doc, setDoc, getDocs, collection } from "firebase/firestore";
-import { gsap } from 'gsap-rn';
-import { Back } from 'gsap';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -20,14 +18,7 @@ const RegisterPage = () => {
 
 
 
-  useEffect(() => {
-    gsap.from(titleRef.current, {
-      duration: 1,
-      delay: 0.2,
-      transform: { rotate: 360, scale: 0.5 },
-      ease: Back.easeInOut
-    });
-  }, [])
+  
 
   useEffect(() => {
     const checkUsernameAvailability = async () => {
@@ -135,7 +126,7 @@ const RegisterPage = () => {
         )}
       </Text>
       <ScrollView contentContainerStyle={styles.scollCotainer}>
-        <Text ref={titleRef} style={{ fontSize: 25, marginBottom: 20, textAlign: "center" }}>
+        <Text style={{ fontSize: 25, marginBottom: 30,  textAlign: "center" }}>
           Sign up to <Text style={{ fontWeight: 'bold', color: 'purple', fontStyle: 'italic' }}>HearMe</Text>
         </Text>
         <TextInput
@@ -203,7 +194,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 40,
     paddingBottom: 50,
-    backgroundColor: '#fff',
+   // backgroundColor: '#fff',
   },
 
   input: {
@@ -218,7 +209,7 @@ const styles = StyleSheet.create({
   registerButton: {
     height: 40,
     borderRadius: 10,
-    backgroundColor: 'blue',
+    backgroundColor: 'navy',
     justifyContent: 'center',
     alignItems: 'center',
     width: 250,

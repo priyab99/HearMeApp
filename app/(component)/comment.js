@@ -92,10 +92,11 @@ const CommentScreen = () => {
         data={comments}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={{ padding: 8, borderBottomWidth: 1, borderBottomColor: 'gray' }}>
-            <Text>{item.content}</Text>
-            <Text>By: {item?.name || 'Anonymous'} </Text>
-            <Text>{item.createdAt.toDate().toLocaleString()}</Text>
+          <View style={{ padding: 8, borderBottomWidth: 1, borderBottomColor: 'lightgray' }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.content}</Text>
+            <Text style={{ fontSize: 14, color: 'gray', marginTop: 5 }}>
+               {item?.name || 'Anonymous'} • {item.createdAt.toDate().toLocaleString()}
+            </Text>
           </View>
         )}
       />
