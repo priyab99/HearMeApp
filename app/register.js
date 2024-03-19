@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, database } from '../config/firebaseConfig';
@@ -13,7 +13,6 @@ const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const titleRef = useRef(null);
   const router = useRouter();
 
 
@@ -45,11 +44,11 @@ const RegisterPage = () => {
 
   const isValidPhoneNumber = () => {
     if (phoneNumber.trim() === '') {
-      return true; // Optional: Phone number is not required
+      return true; 
     }
 
     const phoneNumberRegex = /^\d{11}$/; // a valid phone number has 11 digits
-    return phoneNumberRegex.test(phoneNumber);
+    return phoneNumberRegex.test(phoneNumber);//Checking if a string matches the regular expression pattern
   };
 
   const handleRegister = async () => {
@@ -104,6 +103,7 @@ const RegisterPage = () => {
         name,
         email,
         username,
+        phoneNumber
       });
       //redirecting to login
       router.replace('/');

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, updateDoc, doc, setDoc, onSnapshot, orderBy, query,getDoc } from 'firebase/firestore';
+import { collection, updateDoc, doc, onSnapshot, orderBy, query, getDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
-import RatingComponent from '../(component)/rating';
-import { useRouter} from 'expo-router';
+import { useRouter } from 'expo-router';
 
 
 const HomeScreen = () => {
@@ -12,10 +11,10 @@ const HomeScreen = () => {
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [visiblePosts, setVisiblePosts] = useState([]); 
+  const [visiblePosts, setVisiblePosts] = useState([]);
   const [hasMorePosts, setHasMorePosts] = useState(false);
-  const router=useRouter();
-  
+  const router = useRouter();
+
 
 
   useEffect(() => {
@@ -49,90 +48,62 @@ const HomeScreen = () => {
   const handleLike = async (postId) => {
     try {
       const userId = auth.currentUser.uid;
-      const postRef = doc(database, 'posts', postId);
-      
-      const postSnapshot = await getDoc(postRef);
-      if (!postSnapshot.exists()) {
-        console.error('Post not found');
-        return;
-      }
-  
-      const postData = postSnapshot.data();
-      const likedByUser = postData.likesBy ? postData.likesBy.includes(userId) : false;
-  
-      if (likedByUser) {
-        await updateDoc(postRef, {
-          likes: postData.likes - 1,
-          likesBy: postData.likesBy.filter(id => id !== userId),
-        });
-      } else {
-        await updateDoc(postRef, {
-          likes: postData.likes + 1,
-          likesBy: [...(postData.likesBy || []), userId],
-        });
+      const postIndex = posts.findIndex((post) => post.id === postId);
+      const updatedPosts = [...posts];
+
+      if (postIndex > -1) {
+        const postData = updatedPosts[postIndex];
+        const likedByUser = postData.likesBy ? postData.likesBy.includes(userId) : false;
+        let likes = postData.likes || 0;
+
+        if (likedByUser) {
+          likes -= 1;
+          postData.likesBy = postData.likesBy.filter((id) => id !== userId);
+        } else {
+          likes += 1;
+          postData.likesBy = [...(postData.likesBy || []), userId];
+        }
+
+        postData.likes = likes;
+        updatedPosts[postIndex] = postData;
+        setPosts(updatedPosts);
       }
     } catch (error) {
       console.error('Error updating likes:', error.message);
     }
   };
-  
+
+
   const handleDislike = async (postId) => {
     try {
       const userId = auth.currentUser.uid;
-      const postRef = doc(database, 'posts', postId);
-  
-      const postSnapshot = await getDoc(postRef);
-      if (!postSnapshot.exists()) {
-        console.error('Post not found');
-        return;
-      }
-  
-      const postData = postSnapshot.data();
-      const dislikedByUser = postData.dislikesBy ? postData.dislikesBy.includes(userId) : false;
-  
-      if (dislikedByUser) {
-        await updateDoc(postRef, {
-          dislikes: postData.dislikes - 1,
-          dislikesBy: postData.dislikesBy.filter(id => id !== userId),
-        });
-      } else {
-        await updateDoc(postRef, {
-          dislikes: postData.dislikes + 1,
-          dislikesBy: [...(postData.dislikesBy || []), userId],
-        });
+      const postIndex = posts.findIndex((post) => post.id === postId);
+      const updatedPosts = [...posts];
+
+      if (postIndex > -1) {
+        const postData = updatedPosts[postIndex];
+        const dislikedByUser = postData.dislikesBy ? postData.dislikesBy.includes(userId) : false;
+        let dislikes = postData.dislikes || 0;
+
+        if (dislikedByUser) {
+          dislikes -= 1;
+          postData.dislikesBy = postData.dislikesBy.filter((id) => id !== userId);
+        } else {
+          dislikes += 1;
+          postData.dislikesBy = [...(postData.dislikesBy || []), userId];
+        }
+
+        postData.dislikes = dislikes;
+        updatedPosts[postIndex] = postData;
+        setPosts(updatedPosts);
       }
     } catch (error) {
       console.error('Error updating dislikes:', error.message);
     }
   };
-  
-  
 
 
 
-  const handleRating = async (postId, rating) => {
-    try {
-      const userId = auth.currentUser.uid;
-      const ratingDocRef = doc(collection(database, 'ratings', postId, 'userRatings'), userId);
-
-      // Checking if rating is defined
-      if (typeof rating !== 'undefined') {
-        // creating new rating document for the user
-        await setDoc(ratingDocRef, { rating });
-
-        // Updating local state with the new rating
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId ? { ...post, userRating: rating } : post
-          )
-        );
-      } else {
-        console.error('Error updating rating: Rating is undefined');
-      }
-    } catch (error) {
-      console.error('Error updating rating:', error.message);
-    }
-  };
 
   const loadMorePosts = () => {
     const newVisiblePosts = visiblePosts.concat(posts.slice(visiblePosts.length, visiblePosts.length + 5));
@@ -158,15 +129,15 @@ const HomeScreen = () => {
             {/* Like and Dislike Buttons and Counts */}
             <View style={styles.actions}>
               <TouchableOpacity onPress={() => handleLike(post.id)}>
-            
-               
-                <Text style={styles.text}> <Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes}</Text>
+
+
+                <Text style={styles.text}> <Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes ? post.likes : 0}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDislike(post.id)}>
-                
-                 
-               
-                <Text style={styles.text}><Ionicons name="thumbs-down" size={17} color="gray" /> Dislike {post.dislikes}</Text>
+
+
+
+                <Text style={styles.text}><Ionicons name="thumbs-down" size={17} color="gray" /> Dislike {post.dislikes ? post.dislikes : 0}</Text>
               </TouchableOpacity>
             </View>
 
@@ -174,13 +145,10 @@ const HomeScreen = () => {
 
 
             <View style={styles.actions}>
-              <TouchableOpacity onPress={()=>router.push({ pathname: '/comment', params: { postId: post.id } })}>
-                
-                 <Text style={styles.text}>Comment</Text>
-                </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push({ pathname: '/comment', params: { postId: post.id } })}>
 
-
-              <RatingComponent postId={post.id} onSubmitRating={handleRating} />
+                <Text style={styles.text}> <Ionicons name="chatbubble-outline" size={16} color="gray" />Comment</Text>
+              </TouchableOpacity>
 
             </View>
           </TouchableOpacity>
@@ -190,7 +158,7 @@ const HomeScreen = () => {
       )}
       {hasMorePosts && (
         <TouchableOpacity
-          style={styles.seeMoreButton} 
+          style={styles.seeMoreButton}
           onPress={() => loadMorePosts()}
         >
           <Text style={styles.seeMoreButtonText}>See More</Text>
@@ -222,7 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
-  text:{
+  text: {
     fontSize: 16,
 
   },
@@ -239,15 +207,15 @@ const styles = StyleSheet.create({
   },
   seeMoreButton: {
     padding: 10,
-    backgroundColor: 'navy', 
+    backgroundColor: 'navy',
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 15,
-    
+
   },
   seeMoreButtonText: {
-    color: '#fff', 
+    color: '#fff',
     fontWeight: 'bold',
   },
 });

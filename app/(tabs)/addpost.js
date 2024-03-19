@@ -21,7 +21,7 @@ const AddPost = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const titleRef = useRef(null);
+  const titleRef = useRef(null);//stores animation state
 
   const router=useRouter();
 
@@ -39,7 +39,7 @@ const AddPost = () => {
     const currentDate = selectedDate || date;
     setDate(currentDate);
     
-    // For Android, manually hide the DateTimePicker after date selection
+    // For Android, manually hiding the DateTimePicker after date selection
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
     }
@@ -60,7 +60,7 @@ const AddPost = () => {
   });
 
   useEffect(() => {
-    // Reset subcategory when the main category changes
+    // Resetting subcategory when the main category changes
     setSubCategory('');
   }, [mainCategory]);
 

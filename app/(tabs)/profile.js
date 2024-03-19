@@ -66,9 +66,9 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      // Clear userId from AsyncStorage
+      // Clears userId from AsyncStorage
       await AsyncStorage.removeItem('userId');
-      // Redirect to login screen
+      // Redirecting to login screen
       router.push('/');
     } catch (error) {
       console.error('Error logging out:', error.message);

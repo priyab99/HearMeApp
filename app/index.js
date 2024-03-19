@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TextInput, Pressable, View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
