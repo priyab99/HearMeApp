@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, doc, updateDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
 import { useRouter } from 'expo-router';
@@ -42,9 +42,10 @@ const HomeScreen = () => {
       const updatedPosts = [...posts];
 
       if (postIndex > -1) {
-        const postData = updatedPosts[postIndex];
+        const postData = { ...updatedPosts[postIndex] };
         const likedByUser = postData.likesBy ? postData.likesBy.includes(userId) : false;
         let likes = postData.likes || 0;
+        let dislikes = postData.dislikes || 0;
 
         if (likedByUser) {
           likes -= 1;
@@ -53,14 +54,24 @@ const HomeScreen = () => {
           likes += 1;
           postData.likesBy = [...(postData.likesBy || []), userId];
           if (postData.dislikesBy && postData.dislikesBy.includes(userId)) {
-            postData.dislikes -= 1;
+            dislikes -= 1;
             postData.dislikesBy = postData.dislikesBy.filter((id) => id !== userId);
           }
         }
 
         postData.likes = likes;
+        postData.dislikes = dislikes;
         updatedPosts[postIndex] = postData;
         setPosts(updatedPosts);
+
+        // Update Firestore
+        const postDoc = doc(database, 'posts', postId);
+        await updateDoc(postDoc, {
+          likes: postData.likes,
+          likesBy: postData.likesBy || [],
+          dislikes: postData.dislikes,
+          dislikesBy: postData.dislikesBy || [],
+        });
       }
     } catch (error) {
       console.error('Error updating likes:', error.message);
@@ -74,9 +85,10 @@ const HomeScreen = () => {
       const updatedPosts = [...posts];
 
       if (postIndex > -1) {
-        const postData = updatedPosts[postIndex];
+        const postData = { ...updatedPosts[postIndex] };
         const dislikedByUser = postData.dislikesBy ? postData.dislikesBy.includes(userId) : false;
         let dislikes = postData.dislikes || 0;
+        let likes = postData.likes || 0;
 
         if (dislikedByUser) {
           dislikes -= 1;
@@ -85,14 +97,24 @@ const HomeScreen = () => {
           dislikes += 1;
           postData.dislikesBy = [...(postData.dislikesBy || []), userId];
           if (postData.likesBy && postData.likesBy.includes(userId)) {
-            postData.likes -= 1;
+            likes -= 1;
             postData.likesBy = postData.likesBy.filter((id) => id !== userId);
           }
         }
 
         postData.dislikes = dislikes;
+        postData.likes = likes;
         updatedPosts[postIndex] = postData;
         setPosts(updatedPosts);
+
+        // Update Firestore
+        const postDoc = doc(database, 'posts', postId);
+        await updateDoc(postDoc, {
+          dislikes: postData.dislikes,
+          dislikesBy: postData.dislikesBy || [],
+          likes: postData.likes,
+          likesBy: postData.likesBy || [],
+        });
       }
     } catch (error) {
       console.error('Error updating dislikes:', error.message);
@@ -128,6 +150,7 @@ const HomeScreen = () => {
             <Text style={styles.title}>{post.title}</Text>
             <Text style={styles.description}>{post.description}</Text>
             {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
+            <Text style={styles.emotionScore}>The user is feeling {post.emotionScore}</Text>
             <View style={styles.actions}>
               <TouchableOpacity onPress={() => handleLike(post.id)}>
                 <Text style={styles.text}><Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes ? post.likes : 0}</Text>
@@ -214,6 +237,11 @@ const styles = StyleSheet.create({
   pageNumber: {
     padding: 10,
     color: 'navy',
+  },
+  emotionScore: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: '#007bff',
   },
   activePageNumber: {
     fontWeight: 'bold',

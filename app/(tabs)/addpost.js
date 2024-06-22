@@ -21,9 +21,24 @@ const AddPost = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showDescriptionInput, setShowDescriptionInput] = useState(false);
   const titleRef = useRef(null);//stores animation state
 
   const router = useRouter();
+
+  async function fetchEmotionAnalysis(data){
+    const token = process.env.EXPO_TOKEN; // Replace this with your actual token
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/SamLowe/roberta-base-go_emotions",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
+    const result = await response.json();
+    return result;
+  }
 
 
   useEffect(() => {
@@ -49,15 +64,11 @@ const AddPost = () => {
 
 
   const [categories, setCategories] = useState({
-    '': ['Select Subcategory'],
-    'Life Struggle': ['Challenges', 'Overcoming Obstacles', 'Personal Growth'],
-    'Depression': ['Understanding Depression', 'Coping Strategies', 'Seeking Help'],
-    'Motivation': ['Inspirational Quotes', 'Success Stories', 'Goal Setting'],
-    'Relationships': ['Dating', 'Communication', 'Marriage'],
-    'Success Stories': ['Career Achievements', 'Personal Accomplishments', 'Milestones'],
-    'Mental Health': ['Anxiety', 'Stress Management', 'Self-Care'],
-    'Anxiety': ['Causes of Anxiety', 'Coping Mechanisms', 'Anxiety Disorders'],
-    'Personal Growth': ['Self-Improvement', 'Learning', 'Skill Development'],
+    '': ['Select Age Group'],
+    'Children and Teen': ['12-16 Years', '17-20 Years'],
+    'Young Adult': ['21-25 Years', '26-30 Years'],
+    'Middle-Aged Adult': ['31-40 Years', '41-50 Years'],
+    'Senior': ['51-60 Years', '61+ Years'],
   });
 
   useEffect(() => {
@@ -114,6 +125,17 @@ const AddPost = () => {
 
       // Adding a document ID for the post
       const docRef = doc(database, 'posts', `post_${Date.now()}`); // Using a timestamp for unique ID
+      const sentimentResult = await fetchEmotionAnalysis({ inputs: description });
+       // Extracting dominant sentiment
+       let dominantSentiment;
+       let maxScore = 0;
+ 
+       sentimentResult[0].forEach(sentiment => {
+         if (sentiment.score > maxScore) {
+           dominantSentiment = sentiment.label;
+           maxScore = sentiment.score;
+         }
+       }); 
 
       if (imageUrl) {
         const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
@@ -125,6 +147,7 @@ const AddPost = () => {
             date,
             image: imageUrl,
             userName: userDoc.data().username, // Include user's username in the post
+            emotionScore: dominantSentiment,
           });
         } else {
           console.warn('User document not found');
@@ -136,6 +159,7 @@ const AddPost = () => {
             image: imageUrl,
 
             userName: 'Unknown', // Default value if user document not found
+               emotionScore: dominantSentiment,
           });
         }
       } else {
@@ -146,6 +170,7 @@ const AddPost = () => {
           category: `${mainCategory} - ${subCategory}`,
           date,
           userName: 'Unknown', // Default value if image is not uploaded
+          emotionScore: dominantSentiment,
         });
       }
 
@@ -165,7 +190,18 @@ const AddPost = () => {
       setUploading(false);
     }
   };
-
+  const handleTitleChange = (text) => {
+    setTitle(text);
+    setShowDescriptionInput(text.trim() !== ''); // Show description input when title is not empty
+  };
+ 
+  const splitText = (text) => {
+    return text.split(' ').map((word, index) => (
+      <Text key={index} ref={(el) => (titleRef.current[index] = el)} style={styles.word}>
+        {word}{' '}
+      </Text>
+    ));
+  };
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -177,19 +213,21 @@ const AddPost = () => {
         <TextInput
           style={styles.input}
           placeholder="Title"
-          onChangeText={(text) => setTitle(text)}
+          onChangeText={handleTitleChange}
           value={title}
           keyboardShouldPersistTaps="handled"
         />
-        <TextInput
-          style={styles.desInput}
-          placeholder="Description"
-          onChangeText={(text) => setDescription(text)}
-          value={description}
-          multiline
-          keyboardShouldPersistTaps="handled"
-        />
-        <Text style={styles.label}>Category:</Text>
+          {showDescriptionInput && (
+          <TextInput
+            style={styles.desInput}
+            placeholder="Description"
+            onChangeText={(text) => setDescription(text)}
+            value={description}
+            multiline
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
+        <Text style={styles.label}>Select Your Age Group</Text>
         <View style={styles.pickerContainer}>
           <Picker
             style={styles.input}
