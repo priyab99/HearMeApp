@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { collection, updateDoc, doc, onSnapshot, orderBy, query, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
 import { useRouter } from 'expo-router';
 
-
 const HomeScreen = () => {
-
-
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [visiblePosts, setVisiblePosts] = useState([]);
-  const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const postsPerPage = 6;
   const router = useRouter();
-
-
 
   useEffect(() => {
     const fetchPosts = () => {
@@ -29,8 +24,6 @@ const HomeScreen = () => {
         }));
 
         setPosts(fetchedPosts);
-        setVisiblePosts(fetchedPosts.slice(0, 5)); // Updating visiblePosts after fetching
-        setHasMorePosts(fetchedPosts.length > 5); // Checking for more posts
         setLoading(false);
       });
 
@@ -40,10 +33,7 @@ const HomeScreen = () => {
     fetchPosts();
   }, []);
 
-
-  if (loading) {
-    return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
-  }
+  const totalPages = Math.ceil(posts.length / postsPerPage);
 
   const handleLike = async (postId) => {
     try {
@@ -62,6 +52,10 @@ const HomeScreen = () => {
         } else {
           likes += 1;
           postData.likesBy = [...(postData.likesBy || []), userId];
+          if (postData.dislikesBy && postData.dislikesBy.includes(userId)) {
+            postData.dislikes -= 1;
+            postData.dislikesBy = postData.dislikesBy.filter((id) => id !== userId);
+          }
         }
 
         postData.likes = likes;
@@ -72,7 +66,6 @@ const HomeScreen = () => {
       console.error('Error updating likes:', error.message);
     }
   };
-
 
   const handleDislike = async (postId) => {
     try {
@@ -91,6 +84,10 @@ const HomeScreen = () => {
         } else {
           dislikes += 1;
           postData.dislikesBy = [...(postData.dislikesBy || []), userId];
+          if (postData.likesBy && postData.likesBy.includes(userId)) {
+            postData.likes -= 1;
+            postData.likesBy = postData.likesBy.filter((id) => id !== userId);
+          }
         }
 
         postData.dislikes = dislikes;
@@ -102,15 +99,23 @@ const HomeScreen = () => {
     }
   };
 
-
-
-
-  const loadMorePosts = () => {
-    const newVisiblePosts = visiblePosts.concat(posts.slice(visiblePosts.length, visiblePosts.length + 5));
-    setVisiblePosts(newVisiblePosts);
-    setHasMorePosts(newVisiblePosts.length < posts.length);
+  const goToNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages - 1));
   };
 
+  const goToPreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const visiblePosts = posts.slice(currentPage * postsPerPage, (currentPage + 1) * postsPerPage);
+
+  if (loading) {
+    return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -123,51 +128,40 @@ const HomeScreen = () => {
             <Text style={styles.title}>{post.title}</Text>
             <Text style={styles.description}>{post.description}</Text>
             {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
-
-            {/* Like, Dislike, Comment, and Rating UI */}
-
-            {/* Like and Dislike Buttons and Counts */}
             <View style={styles.actions}>
               <TouchableOpacity onPress={() => handleLike(post.id)}>
-
-
-                <Text style={styles.text}> <Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes ? post.likes : 0}</Text>
+                <Text style={styles.text}><Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes ? post.likes : 0}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDislike(post.id)}>
-
-
-
                 <Text style={styles.text}><Ionicons name="thumbs-down" size={17} color="gray" /> Dislike {post.dislikes ? post.dislikes : 0}</Text>
               </TouchableOpacity>
             </View>
-
-            {/* Comment and Rating (existing functionality) */}
-
-
             <View style={styles.actions}>
               <TouchableOpacity onPress={() => router.push({ pathname: '/comment', params: { postId: post.id } })}>
-
-                <Text style={styles.text}> <Ionicons name="chatbubble-outline" size={16} color="gray" />Comment</Text>
+                <Text style={styles.text}><Ionicons name="chatbubble-outline" size={16} color="gray" /> Comment</Text>
               </TouchableOpacity>
-
             </View>
           </TouchableOpacity>
         ))
       ) : (
         <Text>No posts found.</Text>
       )}
-      {hasMorePosts && (
-        <TouchableOpacity
-          style={styles.seeMoreButton}
-          onPress={() => loadMorePosts()}
-        >
-          <Text style={styles.seeMoreButtonText}>See More</Text>
+      <View style={styles.pagination}>
+        <TouchableOpacity onPress={goToPreviousPage} disabled={currentPage === 0}>
+          <Text style={[styles.paginationButton, currentPage === 0 && styles.disabledButton]}>{'<'}</Text>
         </TouchableOpacity>
-      )}
+        {Array.from({ length: totalPages }).map((_, index) => (
+          <TouchableOpacity key={index} onPress={() => goToPage(index)}>
+            <Text style={[styles.pageNumber, currentPage === index && styles.activePageNumber]}>{index + 1}</Text>
+          </TouchableOpacity>
+        ))}
+        <TouchableOpacity onPress={goToNextPage} disabled={currentPage === totalPages - 1}>
+          <Text style={[styles.paginationButton, currentPage === totalPages - 1 && styles.disabledButton]}>{'>'}</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -192,7 +186,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-
   },
   image: {
     width: '100%',
@@ -205,17 +198,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 8,
   },
-  seeMoreButton: {
-    padding: 10,
-    backgroundColor: 'navy',
-    borderRadius: 5,
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 15,
-
+    marginVertical: 16,
   },
-  seeMoreButtonText: {
-    color: '#fff',
+  paginationButton: {
+    padding: 10,
+    color: 'navy',
+  },
+  disabledButton: {
+    color: 'gray',
+  },
+  pageNumber: {
+    padding: 10,
+    color: 'navy',
+  },
+  activePageNumber: {
     fontWeight: 'bold',
   },
 });

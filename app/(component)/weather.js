@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { View, Text, Image, TextInput, Button, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 
 const WeatherScreen = () => {
@@ -8,24 +9,18 @@ const WeatherScreen = () => {
 
   // Fetching weather data function
   const fetchWeatherData = async () => {
-    const apiKey = process.env.EXPO_OPEN_WEATHER_API_KEY;
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-
     try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
+      const apiKey = process.env.EXPO_OPEN_WEATHER_API_KEY;
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
 
-      if (response.ok) {
-        // Updating the weather data state
-        setWeatherData(data);
-      } else {
-        // Handling error response
-        const errorMessage = data.message || 'City not found';
-        Alert.alert('Error', errorMessage);
-      }
+      const response = await axios.get(apiUrl); // Making GET request using axios
+      const data = response.data; // Extracting data from response
+
+      // Updating weather data state
+      setWeatherData(data);
     } catch (error) {
-      // Handling network or other unexpected errors
-      console.error('Error fetching weather data:', error.message);
+      // Handling errors
+      Alert.alert('Error', 'Failed to fetch weather data');
     }
   };
 

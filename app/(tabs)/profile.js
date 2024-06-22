@@ -11,16 +11,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Profile = () => {
   const router = useRouter();
   const [user, setUser] = useState(null);
-  const [mapRegion, setMapRegion] = useState({
-    latitude: 22.471571779563817,
-    longitude: 91.7851043750746,
-    latitudeDelta: 0.09,
-    longitudeDelta: 0.04,
-  });
+  const [userLocation, setUserLocation] = useState(null); // New state for user's location
   const [locationError, setLocationError] = useState(null);
 
-
-   //fetching user related data
+  // Fetching user related data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -39,8 +33,8 @@ const Profile = () => {
     fetchUserData();
   }, []);
 
-  //asking location permission from user
-  const userLocation = async () => {
+  // Asking location permission from user
+  const getUserLocation = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -49,7 +43,7 @@ const Profile = () => {
       }
 
       let location = await Location.getCurrentPositionAsync({ enableHighAccuracy: true });
-      setMapRegion({
+      setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         latitudeDelta: 0.09,
@@ -61,7 +55,7 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    userLocation();
+    getUserLocation();
   }, []);
 
   const handleLogout = async () => {
@@ -79,7 +73,7 @@ const Profile = () => {
     <View style={styles.container}>
       {user ? (
         <>
-         <View style={styles.profileInfo}>
+          <View style={styles.profileInfo}>
             <Text style={styles.title}>
               <Ionicons name="person" size={24} color="black" /> My Account
             </Text>
@@ -90,23 +84,19 @@ const Profile = () => {
               <Ionicons name="mail-outline" size={20} color="gray" /> {user.email}
             </Text>
             <Text style={styles.text}>
-              <Ionicons name="at-outline" size={20} color="gray" /> Uername: {user.username}
+              <Ionicons name="at-outline" size={20} color="gray" /> Username: {user.username}
             </Text>
-            <TouchableOpacity onPress={()=>router.push('/weather')}>
-                
-          
-                <Text style={styles.text}
-                ><Ionicons name="cloud-outline" size={20} color="gray" />Weather</Text>
-                   </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/weather')}>
+              <Text style={styles.text}>
+                <Ionicons name="cloud-outline" size={20} color="gray" /> Weather
+              </Text>
+            </TouchableOpacity>
             {locationError && <Text style={styles.error}>{locationError}</Text>}
           </View>
-          <MapView style={styles.map} region={mapRegion}>
-            <Marker coordinate={mapRegion} title="My Location" />
+          <MapView style={styles.map} region={userLocation}>
+            {userLocation && <Marker coordinate={userLocation} title="My Location" />}
           </MapView>
-         
-
         </>
-        
       ) : (
         <Text style={styles.loadingText}>Loading user information...</Text>
       )}

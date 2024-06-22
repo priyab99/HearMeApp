@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, View } from 'react-native';
-import   DateTimePicker from '@react-native-community/datetimepicker';
+import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, View, Pressable } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { firebase, database, auth } from "../../config/firebaseConfig"
@@ -23,7 +23,7 @@ const AddPost = () => {
   const [uploading, setUploading] = useState(false);
   const titleRef = useRef(null);//stores animation state
 
-  const router=useRouter();
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -45,7 +45,8 @@ const AddPost = () => {
     }
   };
   
-  
+
+
 
   const [categories, setCategories] = useState({
     '': ['Select Subcategory'],
@@ -155,7 +156,7 @@ const AddPost = () => {
       setSubCategory('');
       setDate(new Date());
       setImage(null);
-      
+
       router.push('/posts');
 
     } catch (error) {
@@ -200,7 +201,9 @@ const AddPost = () => {
               <Picker.Item key={mainCat} label={mainCat} value={mainCat} />
             ))}
           </Picker>
-          {mainCategory !== '' && (
+        </View>
+        {mainCategory !== '' && (
+          <View style={styles.pickerContainer}>
             <Picker
               style={styles.input}
               selectedValue={subCategory}
@@ -212,11 +215,11 @@ const AddPost = () => {
                 <Picker.Item key={subCat} label={subCat} value={subCat} />
               ))}
             </Picker>
-          )}
-        </View>
+          </View>
+        )}
 
 
-        <Text style={styles.label}>Date:</Text>
+<Text style={styles.label}>Date:</Text>
         {Platform.OS === 'ios' ? (
           <Button
             title="Select Date"
@@ -240,6 +243,7 @@ const AddPost = () => {
             onChange={handleDateChange}
           />
         )}
+
 
         {image && <Image source={{ uri: image }} style={{ width: 170, height: 200 }} />}
         <TouchableOpacity style={styles.button} onPress={pickImage}><Text style={styles.buttonText}>Select Image</Text></TouchableOpacity>
@@ -282,11 +286,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   pickerContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 20,
-},
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
 
   desInput: {
     height: 'auto',
