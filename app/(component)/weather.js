@@ -34,7 +34,7 @@ const WeatherScreen = () => {
          <Stack.Screen options={{ headerTitle: `Weather` }} />
       <TextInput
         style={styles.input}
-        placeholder="Enter city name"
+        placeholder="Enter your city name"
         value={city}
         onChangeText={(text) => setCity(text)}
       />
@@ -61,7 +61,7 @@ const WeatherScreen = () => {
           />
         </>
       ) : (
-        <Text>Enter a city and click "Get Weather"</Text>
+        <Text>Enter your city and click "Get Weather"</Text>
       )}
     </View>
     </ScrollView>

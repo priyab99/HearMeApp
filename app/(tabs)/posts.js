@@ -147,6 +147,8 @@ const HomeScreen = () => {
             <Text style={styles.userName}>{post.userName}</Text>
             <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
             <Text style={styles.category}>{post.category}</Text>
+            <Text style={styles.country}>{post.country}</Text>
+            
             <Text style={styles.title}>{post.title}</Text>
             <Text style={styles.description}>{post.description}</Text>
             {post.image && <Image source={{ uri: post.image }} style={styles.image} />}

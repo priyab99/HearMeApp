@@ -8,6 +8,23 @@ import { setDoc, doc, getDoc } from "firebase/firestore";
 import { gsap } from 'gsap-rn';
 import { Back } from 'gsap';
 import { useRouter } from 'expo-router';
+import { ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql } from '@apollo/client';
+
+// Initializing Apollo Client
+const client = new ApolloClient({
+  uri: 'https://countries.trevorblades.com/graphql',
+  cache: new InMemoryCache(),
+});
+
+const COUNTRY_QUERY = gql`
+  query CountryQuery {
+    countries {
+      name
+      capital
+      currency
+    }
+  }
+`;
 
 
 
@@ -22,11 +39,21 @@ const AddPost = () => {
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [showDescriptionInput, setShowDescriptionInput] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('');
   const titleRef = useRef(null);//stores animation state
 
   const router = useRouter();
 
-  async function fetchEmotionAnalysis(data){
+  const { data, loading, error } = useQuery(COUNTRY_QUERY);
+  const [countries, setCountries] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      setCountries(data.countries);
+    }
+  }, [data]);
+
+  async function fetchEmotionAnalysis(data) {
     const token = process.env.EXPO_TOKEN; // Replace this with your actual token
     const response = await fetch(
       "https://api-inference.huggingface.co/models/SamLowe/roberta-base-go_emotions",
@@ -53,22 +80,22 @@ const AddPost = () => {
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setDate(currentDate);
-    
+
     // For Android, manually hiding the DateTimePicker after date selection
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
     }
   };
-  
+
 
 
 
   const [categories, setCategories] = useState({
-    '': ['Select Age Group'],
-    'Children and Teen': ['12-16 Years', '17-20 Years'],
-    'Young Adult': ['21-25 Years', '26-30 Years'],
-    'Middle-Aged Adult': ['31-40 Years', '41-50 Years'],
-    'Senior': ['51-60 Years', '61+ Years'],
+    '': ['Select Your Post Category'],
+    'Life Stages': ['Childhood', 'Teenage Years', 'Young Adulthood', 'Adulthood', 'Midlife', 'Retirement', 'Senior Years'],
+  'Experiences': ['Love & Relationships', 'Family & Friends', 'Career & Work', 'Travel & Adventure', 'Personal Growth', 'Overcoming Challenges', 'Success Stories'],
+  'Emotions': ['Joy', 'Sadness', 'Anger', 'Fear', 'Love', 'Hope', 'Gratitude', 'Forgiveness'],
+  'Themes': ['Inspiration', 'Motivation', 'Advice', 'Humor', 'Vulnerability', 'Identity', 'Loss']
   });
 
   useEffect(() => {
@@ -126,16 +153,16 @@ const AddPost = () => {
       // Adding a document ID for the post
       const docRef = doc(database, 'posts', `post_${Date.now()}`); // Using a timestamp for unique ID
       const sentimentResult = await fetchEmotionAnalysis({ inputs: description });
-       // Extracting dominant sentiment
-       let dominantSentiment;
-       let maxScore = 0;
- 
-       sentimentResult[0].forEach(sentiment => {
-         if (sentiment.score > maxScore) {
-           dominantSentiment = sentiment.label;
-           maxScore = sentiment.score;
-         }
-       }); 
+      // Extracting dominant sentiment
+      let dominantSentiment;
+      let maxScore = 0;
+
+      sentimentResult[0].forEach(sentiment => {
+        if (sentiment.score > maxScore) {
+          dominantSentiment = sentiment.label;
+          maxScore = sentiment.score;
+        }
+      });
 
       if (imageUrl) {
         const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
@@ -148,6 +175,7 @@ const AddPost = () => {
             image: imageUrl,
             userName: userDoc.data().username, // Include user's username in the post
             emotionScore: dominantSentiment,
+            country: selectedCountry,
           });
         } else {
           console.warn('User document not found');
@@ -159,7 +187,8 @@ const AddPost = () => {
             image: imageUrl,
 
             userName: 'Unknown', // Default value if user document not found
-               emotionScore: dominantSentiment,
+            emotionScore: dominantSentiment,
+            country: selectedCountry,
           });
         }
       } else {
@@ -171,6 +200,7 @@ const AddPost = () => {
           date,
           userName: 'Unknown', // Default value if image is not uploaded
           emotionScore: dominantSentiment,
+          country: selectedCountry,
         });
       }
 
@@ -181,6 +211,7 @@ const AddPost = () => {
       setSubCategory('');
       setDate(new Date());
       setImage(null);
+      setSelectedCountry('');
 
       router.push('/posts');
 
@@ -194,14 +225,14 @@ const AddPost = () => {
     setTitle(text);
     setShowDescriptionInput(text.trim() !== ''); // Show description input when title is not empty
   };
- 
-  const splitText = (text) => {
-    return text.split(' ').map((word, index) => (
-      <Text key={index} ref={(el) => (titleRef.current[index] = el)} style={styles.word}>
-        {word}{' '}
-      </Text>
-    ));
-  };
+
+  if (loading) return <ActivityIndicator />;
+  if (error) {
+    console.error("GraphQL Error:", error.message);
+    return <Text>Error: {error.message}</Text>;
+  }
+  if (!countries || countries.length === 0) return <Text>No countries found.</Text>;
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -217,7 +248,7 @@ const AddPost = () => {
           value={title}
           keyboardShouldPersistTaps="handled"
         />
-          {showDescriptionInput && (
+        {showDescriptionInput && (
           <TextInput
             style={styles.desInput}
             placeholder="Description"
@@ -227,7 +258,7 @@ const AddPost = () => {
             keyboardShouldPersistTaps="handled"
           />
         )}
-        <Text style={styles.label}>Select Your Age Group</Text>
+        <Text style={styles.label}>Select Your Post Category</Text>
         <View style={styles.pickerContainer}>
           <Picker
             style={styles.input}
@@ -256,8 +287,22 @@ const AddPost = () => {
           </View>
         )}
 
+        <Text style={styles.label}>Select Your Country</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            style={styles.input}
+            selectedValue={selectedCountry}
+            onValueChange={(itemValue) => setSelectedCountry(itemValue)}
+            keyboardShouldPersistTaps="handled"
+          >
+            {countries.map((country, index) => (
+              <Picker.Item key={index} label={country.name} value={country.name} />
+            ))}
+          </Picker>
+        </View>
 
-<Text style={styles.label}>Date:</Text>
+
+        <Text style={styles.label}>Date:</Text>
         {Platform.OS === 'ios' ? (
           <Button
             title="Select Date"
@@ -369,4 +414,10 @@ const styles = StyleSheet.create({
 });
 
 
-export default AddPost;
+const AddPostApp = () => (
+  <ApolloProvider client={client}>
+    <AddPost />
+  </ApolloProvider>
+);
+
+export default AddPostApp;

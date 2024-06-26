@@ -28,7 +28,7 @@ export default () => {
         name="profile"
         options={{
           tabBarLabel: 'Profile',
-          headerTitle: "My Account",
+          headerTitle: " My Profile",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />
           ),

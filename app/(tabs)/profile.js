@@ -74,9 +74,6 @@ const Profile = () => {
       {user ? (
         <>
           <View style={styles.profileInfo}>
-            <Text style={styles.title}>
-              <Ionicons name="person" size={24} color="black" /> My Account
-            </Text>
             <Text style={styles.text}>
               <Ionicons name="person-outline" size={20} color="gray" /> {user.name}
             </Text>
