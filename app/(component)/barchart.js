@@ -89,7 +89,7 @@ const BarChartScreen = () => {
         <ScrollView horizontal>
         <BarChart
           data={barChartData}
-          width={400}
+          width={500}
           height={300}
           yAxisLabel="Posts "
           chartConfig={{
