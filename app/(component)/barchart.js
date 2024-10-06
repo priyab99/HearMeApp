@@ -52,7 +52,7 @@ const BarChartScreen = () => {
 
     fetchData();
 
-    // Fetching data every month (adjust the interval as needed)
+    // Fetching data every month (adjusting the interval as needed)
     const intervalId = setInterval(fetchData, 30 * 24 * 60 * 60 * 1000);
 
     return () => {
@@ -104,10 +104,10 @@ const BarChartScreen = () => {
             style: {
               borderRadius: 16,
             },
-            barPercentage: 0.7,  // Adjust this to change bar width
+            barPercentage: 0.7,  
             propsForLabels: {
               fontSize: 8,  // Smaller font size for month names
-              rotation: 45,  // Rotate labels for better readability
+              rotation: 45,  // Rotating labels for better readability
             },
           }}
           style={{

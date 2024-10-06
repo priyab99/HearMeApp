@@ -9,17 +9,29 @@ const CommentScreen = ({ postId }) => {
   const [user, setUser] = useState(null);
 
   async function fetchSentimentAnalysis(data) {
-    const token = process.env.EXPO_TOKEN;
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        method: "POST",
-        body: JSON.stringify(data),
+    try {
+      const token = process.env.EXPO_TOKEN;
+      if (!token) {
+        console.error('EXPO_TOKEN is not set');
+        return null;
       }
-    );
-    const result = await response.json();
-    return result;
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          method: "POST",
+          body: JSON.stringify(data),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Error in fetchSentimentAnalysis:', error);
+      return null;
+    }
   }
 
   useEffect(() => {
@@ -59,23 +71,26 @@ const CommentScreen = ({ postId }) => {
 
   const handleSubmitComment = async (content) => {
     try {
-      const userId = auth.currentUser.uid;
+      const userId = auth.currentUser?.uid;
       if (!userId) {
-        console.error('Error adding comment: User not authenticated');
+        Alert.alert('Error', 'User not authenticated. Please log in to comment.');
         return;
       }
 
+      let dominantSentiment = 'neutral';
       const sentimentResult = await fetchSentimentAnalysis({ "inputs": content });
 
-      let dominantSentiment;
-      let maxScore = 0;
-
-      sentimentResult[0].forEach(sentiment => {
-        if (sentiment.score > maxScore) {
-          dominantSentiment = sentiment.label;
-          maxScore = sentiment.score;
-        }
-      });
+      if (sentimentResult && Array.isArray(sentimentResult) && sentimentResult[0]) {
+        let maxScore = 0;
+        sentimentResult[0].forEach(sentiment => {
+          if (sentiment.score > maxScore) {
+            dominantSentiment = sentiment.label;
+            maxScore = sentiment.score;
+          }
+        });
+      } else {
+        console.warn('Sentiment analysis result is not in the expected format');
+      }
 
       const commentsCollectionRef = collection(database, 'posts', postId, 'comments');
       await addDoc(commentsCollectionRef, {
@@ -89,6 +104,7 @@ const CommentScreen = ({ postId }) => {
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
+      Alert.alert('Error', 'Failed to add comment. Please try again.');
     }
   };
 

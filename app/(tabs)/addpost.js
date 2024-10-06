@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, TextInput, Button, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { firebase, database, auth } from "../../config/firebaseConfig"
 import { setDoc, doc, getDoc } from "firebase/firestore";
-import { gsap } from 'gsap-rn';
-import {Back} from 'gsap';
+
 
 import { useRouter } from 'expo-router';
 import { ApolloClient, InMemoryCache, ApolloProvider, useQuery, gql } from '@apollo/client';
@@ -40,7 +39,7 @@ const AddPost = () => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [states, setStates] = useState([]);
-  const titleRef = useRef(null);//stores animation state
+
 
 
   const router = useRouter();
@@ -56,14 +55,7 @@ const AddPost = () => {
   }, [data]);
 
  
-  useEffect(() => {
-    gsap.from(titleRef.current, {
-      duration: 1,
-      delay: 0.2,
-      transform: { rotate: 360, scale: 0.5 },
-      ease: Back.easeInOut
-    });
-  }, [])
+
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -181,7 +173,7 @@ const AddPost = () => {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Text ref={titleRef} style={styles.heading}>Add Your Post</Text>
+      <Text style={styles.heading}>Add Your Post</Text>
         <TextInput
           style={styles.input}
           placeholder="Title"

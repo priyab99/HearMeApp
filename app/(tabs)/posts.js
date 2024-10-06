@@ -73,7 +73,7 @@ const HomeScreen = () => {
         updatedPosts[postIndex] = postData;
         setPosts(updatedPosts);
 
-        // Update Firestore
+        // Updating Firestore
         const postDoc = doc(database, 'posts', postId);
         await updateDoc(postDoc, {
           likes: postData.likes,
@@ -116,7 +116,7 @@ const HomeScreen = () => {
         updatedPosts[postIndex] = postData;
         setPosts(updatedPosts);
 
-        // Update Firestore
+        // Updating Firestore
         const postDoc = doc(database, 'posts', postId);
         await updateDoc(postDoc, {
           dislikes: postData.dislikes,
