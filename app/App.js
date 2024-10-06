@@ -49,7 +49,7 @@ const App = () => {
     { path: '/profile', component: ProfileScreen, isPublic: user },
     { path: '/addpost', component:  AddPostApp, isPublic: user },
     { path: '/rating', component: RatingComponent, isPublic: user },
-    { path: '/comment', component: CommentScreen, isPublic: user },
+    //{ path: '/comment', component: CommentScreen, isPublic: user },
     { path: '/weather', component: WeatherScreen, isPublic: user },
     { path: '/video', component: VideoScreen, isPublic: user },
     { path: '/barchart', component: BarChartScreen, isPublic: user },

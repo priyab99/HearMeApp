@@ -55,19 +55,7 @@ const AddPost = () => {
     }
   }, [data]);
 
-  async function fetchEmotionAnalysis(data) {
-    const token = process.env.EXPO_TOKEN; // Replace this with your actual token
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/SamLowe/roberta-base-go_emotions",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    );
-    const result = await response.json();
-    return result;
-  }
+ 
   useEffect(() => {
     gsap.from(titleRef.current, {
       duration: 1,
@@ -127,15 +115,6 @@ const AddPost = () => {
       setUploading(true);
       const imageUrl = await uploadImage();
       const docRef = doc(database, 'posts', `post_${Date.now()}`);
-      const sentimentResult = await fetchEmotionAnalysis({ inputs: description });
-      let dominantSentiment;
-      let maxScore = 0;
-      sentimentResult[0].forEach(sentiment => {
-        if (sentiment.score > maxScore) {
-          dominantSentiment = sentiment.label;
-          maxScore = sentiment.score;
-        }
-      });
       if (imageUrl) {
         const userDoc = await getDoc(doc(database, 'users', auth.currentUser.uid));
         if (userDoc.exists()) {
@@ -146,7 +125,6 @@ const AddPost = () => {
             date,
             image: imageUrl,
             userName: userDoc.data().username,
-            emotionScore: dominantSentiment,
             country: selectedCountry,
             state: selectedState,
           });
@@ -158,7 +136,6 @@ const AddPost = () => {
             date,
             image: imageUrl,
             userName: 'Unknown',
-            emotionScore: dominantSentiment,
             country: selectedCountry,
             state: selectedState,
           });
@@ -170,7 +147,6 @@ const AddPost = () => {
           category,
           date,
           userName: 'Unknown',
-          emotionScore: dominantSentiment,
           country: selectedCountry,
           state: selectedState,
         });

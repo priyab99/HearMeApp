@@ -3,14 +3,16 @@ import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIn
 import { collection, onSnapshot, orderBy, query, doc, updateDoc } from 'firebase/firestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { database, auth } from '../../config/firebaseConfig';
-import { useRouter } from 'expo-router';
+//import { useRouter } from 'expo-router';
+import CommentScreen from '../(component)/comment';
 
 const HomeScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [showComments, setShowComments] = useState({});
   const postsPerPage = 6;
-  const router = useRouter();
+ // const router = useRouter();
 
   useEffect(() => {
     const fetchPosts = () => {
@@ -32,6 +34,13 @@ const HomeScreen = () => {
 
     fetchPosts();
   }, []);
+
+  const toggleComments = (postId) => {
+    setShowComments((prevState) => ({
+      ...prevState,
+      [postId]: !prevState[postId],
+    }));
+  };
 
   const totalPages = Math.ceil(posts.length / postsPerPage);
 
@@ -144,28 +153,31 @@ const HomeScreen = () => {
       {visiblePosts.length > 0 ? (
         visiblePosts.map((post) => (
           <TouchableOpacity key={post.id} style={styles.card}>
-            <Text style={styles.userName}>{post.userName}</Text>
-            <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
-            <Text style={styles.category}>{post.category}</Text>
-            <Text style={styles.country}>{post.country},{post.state}</Text>
-            <Text style={styles.title}>{post.title}</Text>
-            <Text style={styles.description}>{post.description}</Text>
-            {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
-            <Text style={styles.emotionScore}>The user is feeling {post.emotionScore}</Text>
-            <View style={styles.actions}>
-              <TouchableOpacity onPress={() => handleLike(post.id)}>
-                <Text style={styles.text}><Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes ? post.likes : 0}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleDislike(post.id)}>
-                <Text style={styles.text}><Ionicons name="thumbs-down" size={17} color="gray" /> Dislike {post.dislikes ? post.dislikes : 0}</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.actions}>
-              <TouchableOpacity onPress={() => router.push({ pathname: '/comment', params: { postId: post.id } })}>
-                <Text style={styles.text}><Ionicons name="chatbubble-outline" size={16} color="gray" /> Comment</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+          <Text style={styles.userName}>{post.userName}</Text>
+          <Text style={styles.date}>{new Date(post.date.seconds * 1000).toLocaleDateString()}</Text>
+          <Text style={styles.category}>{post.category}</Text>
+          <Text style={styles.country}>{post.country},{post.state}</Text>
+          <Text style={styles.title}>{post.title}</Text>
+          <Text style={styles.description}>{post.description}</Text>
+          {post.image && <Image source={{ uri: post.image }} style={styles.image} />}
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={() => handleLike(post.id)}>
+              <Text style={styles.text}><Ionicons name="thumbs-up" size={17} color="gray" /> Like {post.likes ? post.likes : 0}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleDislike(post.id)}>
+              <Text style={styles.text}><Ionicons name="thumbs-down" size={17} color="gray" /> Dislike {post.dislikes ? post.dislikes : 0}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={() => toggleComments(post.id)}>
+              <Text style={styles.text}>
+                <Ionicons name="chatbubble-outline" size={16} color="gray" /> {showComments[post.id] ? 'Hide Comments' : 'Comments'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {showComments[post.id] && <CommentScreen postId={post.id} />}
+        </TouchableOpacity>
+        
         ))
       ) : (
         <Text>No posts found.</Text>

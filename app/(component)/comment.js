@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, Button } from 'react-native';
+import { View, Text, TextInput, ScrollView, Button, StyleSheet } from 'react-native';
 import { database, auth } from '../../config/firebaseConfig';
 import { collection, query as firestoreQuery, orderBy, onSnapshot, addDoc, getDoc, doc } from 'firebase/firestore';
-import { useLocalSearchParams, Stack } from 'expo-router';
 
-
-
-const CommentScreen = () => {
-  const { postId } = useLocalSearchParams();
+const CommentScreen = ({ postId }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [user, setUser] = useState(null);
 
-
   async function fetchSentimentAnalysis(data) {
-    const token = process.env.EXPO_TOKEN; // Replace this with your actual token
+    const token = process.env.EXPO_TOKEN;
     const response = await fetch(
       "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest",
       {
@@ -71,9 +66,7 @@ const CommentScreen = () => {
       }
 
       const sentimentResult = await fetchSentimentAnalysis({ "inputs": content });
-  
 
-      // Extracting dominant sentiment
       let dominantSentiment;
       let maxScore = 0;
 
@@ -93,21 +86,17 @@ const CommentScreen = () => {
         sentiment: dominantSentiment
       });
 
-
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
     }
   };
 
-
   return (
-    <View style={{ flex: 1 }}>
-      <Stack.Screen options={{ headerTitle: `Comments On This Post` }} />
-      {/* Comment Input Field */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+    <View style={styles.container}>
+      <View style={styles.inputContainer}>
         <TextInput
-          style={{ flex: 1, borderWidth: 1, borderColor: 'gray', padding: 8, marginRight: 8, marginTop: 10, marginLeft: 5 }}
+          style={styles.input}
           placeholder="Give some guidelines..."
           value={newComment}
           onChangeText={(text) => setNewComment(text)}
@@ -115,26 +104,66 @@ const CommentScreen = () => {
         <Button title="Submit" onPress={() => handleSubmitComment(newComment)} />
       </View>
 
-      {/* Displaying Comments */}
-      <FlatList
-        data={comments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={{ padding: 8, borderBottomWidth: 1, borderBottomColor: 'lightgray' }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.content}</Text>
-            <Text style={{ fontSize: 14, color: 'gray', marginTop: 5 }}>
+      <ScrollView style={styles.commentsContainer}>
+        {comments.map((item) => (
+          <View key={item.id} style={styles.commentItem}>
+            <Text style={styles.commentContent}>{item.content}</Text>
+            <Text style={styles.commentMeta}>
               {item?.name || 'Anonymous'} • {item.createdAt.toDate().toLocaleString()}
             </Text>
             {item.sentiment && (
-              <Text style={{ fontSize: 14, color: item.sentiment === 'positive' ? 'green' : item.sentiment === 'negative' ? 'red' : 'black' }}>
+              <Text style={[
+                styles.sentimentText,
+                { color: item.sentiment === 'positive' ? 'green' : item.sentiment === 'negative' ? 'red' : 'black' }
+              ]}>
                 {item.sentiment.toUpperCase()} Sentiment
               </Text>
             )}
           </View>
-        )}
-      />
+        ))}
+      </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 8,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: 'gray',
+    padding: 8,
+    marginRight: 8,
+  },
+  commentsContainer: {
+    flex: 1,
+  },
+  commentItem: {
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgray',
+  },
+  commentContent: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  commentMeta: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 5,
+  },
+  sentimentText: {
+    fontSize: 14,
+    marginTop: 5,
+  },
+});
 
 export default CommentScreen;

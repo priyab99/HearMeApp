@@ -11,11 +11,10 @@ const BarChartScreen = () => {
   const [categoryCounts, setCategoryCounts] = useState({});
 
 
-  const getDayName = (date) => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days[date.getDay()];
+  const getMonthName = (date) => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[date.getMonth()];
   };
-  
   const getRandomColor = () => {
     return '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
   };
@@ -30,15 +29,18 @@ const BarChartScreen = () => {
 
         postsSnapshot.forEach((doc) => {
           const { date, category } = doc.data();
-          const dayName = getDayName(date.toDate());
-          counts[dayName] = (counts[dayName] || 0) + 1;
+          const monthName = getMonthName(date.toDate());
+          counts[monthName] = (counts[monthName] || 0) + 1;
 
           // Counting categories
-          const trimmedCategory = category.split(' - ')[0]; // Trimming the category name
+          const trimmedCategory = category.split(' - ')[0];
           categoryCountsObj[trimmedCategory] = (categoryCountsObj[trimmedCategory] || 0) + 1;
         });
 
-        const sortedCounts = Object.entries(counts).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+        const sortedCounts = Object.entries(counts).sort((a, b) => {
+          const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+          return months.indexOf(a[0]) - months.indexOf(b[0]);
+        });
         setPostCounts(sortedCounts);
         setCategoryCounts(categoryCountsObj);
         setLoading(false);
@@ -50,8 +52,8 @@ const BarChartScreen = () => {
 
     fetchData();
 
-    // Fetching data every week (adjust the interval as needed)
-    const intervalId = setInterval(fetchData, 7 * 24 * 60 * 60 * 1000);
+    // Fetching data every month (adjust the interval as needed)
+    const intervalId = setInterval(fetchData, 30 * 24 * 60 * 60 * 1000);
 
     return () => {
       clearInterval(intervalId);
@@ -80,27 +82,32 @@ const BarChartScreen = () => {
   }));
 
   return (
-    
-      <View style={styles.container}>
-        
-        <Stack.Screen options={{ headerTitle: `Charts` }} />
-        <Text style={{ fontSize: 20, marginBottom: 5, fontWeight: 'bold', textAlign: 'center', marginTop: 10, color:'white', borderWidth: 2, borderRadius:10, backgroundColor: 'navy' }}>Visualizing Daily Activity</Text>
-        <Text style={{ fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Posts Created Throughout the Week:</Text>
-        <ScrollView horizontal>
+
+    <View style={styles.container}>
+
+      <Stack.Screen options={{ headerTitle: `Charts` }} />
+      <Text style={{ fontSize: 20, marginBottom: 5, fontWeight: 'bold', textAlign: 'center', marginTop: 10, color: 'white', borderWidth: 2, borderRadius: 10, backgroundColor: 'navy' }}>Visualizing Daily Activity</Text>
+      <Text style={{ fontSize: 20, textAlign: 'center', fontWeight: 'bold' }}>Posts Created Throughout the Year:</Text>
+      <ScrollView horizontal>
         <BarChart
           data={barChartData}
-          width={500}
+          width={400}  // Increased width to accommodate more bars
           height={300}
-          yAxisLabel="Posts "
+          yAxisLabel=" "
           chartConfig={{
             backgroundColor: '#ffffff',
             backgroundGradientFrom: '#ffffff',
             backgroundGradientTo: '#ffffff',
             decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(70, 130, 180, ${opacity})`, 
+            color: (opacity = 1) => `rgba(70, 130, 180, ${opacity})`,
             labelColor: (opacity = 2) => `rgba(70, 130, 180, ${opacity})`,
             style: {
               borderRadius: 16,
+            },
+            barPercentage: 0.7,  // Adjust this to change bar width
+            propsForLabels: {
+              fontSize: 8,  // Smaller font size for month names
+              rotation: 45,  // Rotate labels for better readability
             },
           }}
           style={{
@@ -112,9 +119,9 @@ const BarChartScreen = () => {
           showBarTops={false}
           withInnerLines={false}
         />
-        </ScrollView>
-        <Text style={{ fontSize: 20, marginBottom: 5, fontWeight: 'bold', textAlign: 'center', marginTop: 20 }}>Post Categories Breakdown:</Text>
-        <ScrollView horizontal>
+      </ScrollView>
+      <Text style={{ fontSize: 20, marginBottom: 5, fontWeight: 'bold', textAlign: 'center', marginTop: 20 }}>Post Categories Breakdown:</Text>
+      <ScrollView horizontal>
         <PieChart
           data={pieChartData}
           width={460}
@@ -127,29 +134,30 @@ const BarChartScreen = () => {
             labelColor: (opacity = 1) => `rgba(70, 130, 180, ${opacity})`,
             style: {
               borderRadius: 16,
-           
+
             },
           }}
           accessor="count"
           backgroundColor="transparent"
           paddingLeft="5"
-             paddingRight='20'
+          paddingRight='20'
 
           absolute
         />
-        </ScrollView>
-        
-      </View>
-   
+      </ScrollView>
+
+    </View>
+
   );
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 10
-      //backgroundColor: '#fff',
-    },})
+  container: {
+    flex: 1,
+    padding: 10
+    //backgroundColor: '#fff',
+  },
+})
 
 
 
